@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バイノーラル周波数ジェネレーター</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .ear-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .ear-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s;
+        }
+
+        .ear-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .ear-label {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ear-icon {
+            font-size: 1.5em;
+        }
+
+        .freq-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .octave-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .octave-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .octave-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .octave-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mute-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid rgba(76, 175, 80, 0.6);
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .mute-btn:hover {
+            background: rgba(76, 175, 80, 0.4);
+            transform: scale(1.02);
+        }
+
+        .mute-btn.muted {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: rgba(244, 67, 54, 0.6);
+        }
+
+        .mute-btn.muted:hover {
+            background: rgba(244, 67, 54, 0.4);
+        }
+
+        .bpm-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .bpm-display {
+            font-size: 1.8em;
+            text-align: center;
+            margin: 15px 0;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .control-btn.stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 600px) {
+            .ear-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎧 バイノーラル周波数ジェネレーター</h1>
+        
+        <div class="ear-controls">
+            <div class="ear-section">
+                <div class="ear-label">
+                    <span class="ear-icon">👂</span>
+                    <span>左耳 (L)</span>
+                </div>
+                <div class="freq-display" id="leftFreqDisplay">440 Hz</div>
+                <div class="slider-container">
+                    <input type="range" class="slider" id="leftFreq" min="20" max="20000" value="440" step="1">
+                </div>
+                <div class="octave-buttons">
+                    <button class="octave-btn" onclick="changeOctave('left', -1)">-1 Oct</button>
+                    <button class="octave-btn" onclick="changeOctave('left', 1)">+1 Oct</button>
+                </div>
+                <button class="mute-btn" id="leftMuteBtn" onclick="toggleMute('left')">🔊 ON</button>
+            </div>
+            
+            <div class="ear-section">
+                <div class="ear-label">
+                    <span class="ear-icon">👂</span>
+                    <span>右耳 (R)</span>
+                </div>
+                <div class="freq-display" id="rightFreqDisplay">448 Hz</div>
+                <div class="slider-container">
+                    <input type="range" class="slider" id="rightFreq" min="20" max="20000" value="448" step="1">
+                </div>
+                <div class="octave-buttons">
+                    <button class="octave-btn" onclick="changeOctave('right', -1)">-1 Oct</button>
+                    <button class="octave-btn" onclick="changeOctave('right', 1)">+1 Oct</button>
+                </div>
+                <button class="mute-btn" id="rightMuteBtn" onclick="toggleMute('right')">🔊 ON</button>
+            </div>
+        </div>
+        
+        <div class="bpm-section">
+            <div class="ear-label">
+                <span>🎵 BPM設定</span>
+            </div>
+            <div class="bpm-display" id="bpmDisplay">120 BPM</div>
+            <div class="slider-container">
+                <input type="range" class="slider" id="bpmSlider" min="30" max="300" value="120" step="1">
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="randomBpm">
+                <label for="randomBpm">ランダムBPM (60-180)</label>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="control-btn" id="playBtn" onclick="togglePlay()">▶ 再生</button>
+            <button class="control-btn stop" id="stopBtn" onclick="stopSound()" style="display: none;">⏹ 停止</button>
+        </div>
+        
+        <div class="status" id="status">停止中</div>
+    </div>
+
+    <script>
+        let audioContext = null;
+        let leftOscillator = null;
+        let rightOscillator = null;
+        let leftGain = null;
+        let rightGain = null;
+        let merger = null;
+        let isPlaying = false;
+        let bpmInterval = null;
+        let randomBpmInterval = null;
+        let leftMuted = false;
+        let rightMuted = false;
+
+        // ミュート切り替え
+        function toggleMute(ear) {
+            const btn = ear === 'left' ? document.getElementById('leftMuteBtn') : document.getElementById('rightMuteBtn');
+            const gain = ear === 'left' ? leftGain : rightGain;
+            
+            if (ear === 'left') {
+                leftMuted = !leftMuted;
+                if (leftMuted) {
+                    btn.textContent = '🔇 OFF';
+                    btn.classList.add('muted');
+                    if (gain) gain.gain.value = 0;
+                } else {
+                    btn.textContent = '🔊 ON';
+                    btn.classList.remove('muted');
+                    if (gain) gain.gain.value = 0.3;
+                }
+            } else {
+                rightMuted = !rightMuted;
+                if (rightMuted) {
+                    btn.textContent = '🔇 OFF';
+                    btn.classList.add('muted');
+                    if (gain) gain.gain.value = 0;
+                } else {
+                    btn.textContent = '🔊 ON';
+                    btn.classList.remove('muted');
+                    if (gain) gain.gain.value = 0.3;
+                }
+            }
+        }
+
+        // フルスクリーン設定
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // 初期化
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // 周波数表示の更新
+        document.getElementById('leftFreq').addEventListener('input', function() {
+            const freq = this.value;
+            document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
+            if (leftOscillator) {
+                leftOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            }
+        });
+
+        document.getElementById('rightFreq').addEventListener('input', function() {
+            const freq = this.value;
+            document.getElementById('rightFreqDisplay').textContent = freq + ' Hz';
+            if (rightOscillator) {
+                rightOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            }
+        });
+
+        // BPM表示の更新
+        document.getElementById('bpmSlider').addEventListener('input', function() {
+            const bpm = this.value;
+            document.getElementById('bpmDisplay').textContent = bpm + ' BPM';
+            if (isPlaying) {
+                updateBPM(bpm);
+            }
+        });
+
+        // オクターブ変更
+        function changeOctave(ear, direction) {
+            const slider = ear === 'left' ? document.getElementById('leftFreq') : document.getElementById('rightFreq');
+            const display = ear === 'left' ? document.getElementById('leftFreqDisplay') : document.getElementById('rightFreqDisplay');
+            
+            let currentFreq = parseFloat(slider.value);
+            let newFreq;
+            
+            if (direction === 1) {
+                newFreq = currentFreq * 2;
+            } else {
+                newFreq = currentFreq / 2;
+            }
+            
+            // 周波数範囲内に収める
+            newFreq = Math.max(20, Math.min(20000, newFreq));
+            
+            slider.value = newFreq;
+            display.textContent = Math.round(newFreq) + ' Hz';
+            
+            if (isPlaying) {
+                if (ear === 'left' && leftOscillator) {
+                    leftOscillator.frequency.setValueAtTime(newFreq, audioContext.currentTime);
+                } else if (ear === 'right' && rightOscillator) {
+                    rightOscillator.frequency.setValueAtTime(newFreq, audioContext.currentTime);
+                }
+            }
+        }
+
+        // BPM更新
+        function updateBPM(bpm) {
+            if (bpmInterval) {
+                clearInterval(bpmInterval);
+            }
+            
+            const interval = 60000 / bpm;
+            
+            bpmInterval = setInterval(() => {
+                if (leftGain && rightGain) {
+                    const now = audioContext.currentTime;
+                    
+                    if (!leftMuted) {
+                        leftGain.gain.cancelScheduledValues(now);
+                        leftGain.gain.setValueAtTime(0.3, now);
+                        leftGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                        leftGain.gain.exponentialRampToValueAtTime(0.3, now + 0.1);
+                    }
+                    
+                    if (!rightMuted) {
+                        rightGain.gain.cancelScheduledValues(now);
+                        rightGain.gain.setValueAtTime(0.3, now);
+                        rightGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                        rightGain.gain.exponentialRampToValueAtTime(0.3, now + 0.1);
+                    }
+                }
+            }, interval);
+        }
+
+        // ランダムBPM
+        document.getElementById('randomBpm').addEventListener('change', function() {
+            if (this.checked && isPlaying) {
+                startRandomBPM();
+            } else {
+                stopRandomBPM();
+            }
+        });
+
+        function startRandomBPM() {
+            randomBpmInterval = setInterval(() => {
+                const randomBpm = Math.floor(Math.random() * (180 - 60 + 1)) + 60;
+                document.getElementById('bpmSlider').value = randomBpm;
+                document.getElementById('bpmDisplay').textContent = randomBpm + ' BPM';
+                updateBPM(randomBpm);
+            }, 5000);
+        }
+
+        function stopRandomBPM() {
+            if (randomBpmInterval) {
+                clearInterval(randomBpmInterval);
+                randomBpmInterval = null;
+            }
+        }
+
+        // 再生/停止
+        function togglePlay() {
+            if (!isPlaying) {
+                startSound();
+            } else {
+                stopSound();
+            }
+        }
+
+        function startSound() {
+            initAudio();
+            enterFullscreen();
+            
+            const leftFreq = parseFloat(document.getElementById('leftFreq').value);
+            const rightFreq = parseFloat(document.getElementById('rightFreq').value);
+            const bpm = parseFloat(document.getElementById('bpmSlider').value);
+            
+            // 左チャンネル
+            leftOscillator = audioContext.createOscillator();
+            leftGain = audioContext.createGain();
+            leftOscillator.frequency.value = leftFreq;
+            leftOscillator.type = 'sine';
+            leftGain.gain.value = leftMuted ? 0 : 0.3;
+            
+            // 右チャンネル
+            rightOscillator = audioContext.createOscillator();
+            rightGain = audioContext.createGain();
+            rightOscillator.frequency.value = rightFreq;
+            rightOscillator.type = 'sine';
+            rightGain.gain.value = rightMuted ? 0 : 0.3;
+            
+            // ステレオマージャー
+            merger = audioContext.createChannelMerger(2);
+            
+            // 接続
+            leftOscillator.connect(leftGain);
+            leftGain.connect(merger, 0, 0);
+            
+            rightOscillator.connect(rightGain);
+            rightGain.connect(merger, 0, 1);
+            
+            merger.connect(audioContext.destination);
+            
+            // 開始
+            leftOscillator.start();
+            rightOscillator.start();
+            
+            updateBPM(bpm);
+            
+            if (document.getElementById('randomBpm').checked) {
+                startRandomBPM();
+            }
+            
+            isPlaying = true;
+            document.getElementById('playBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            document.getElementById('status').textContent = '再生中...';
+        }
+
+        function stopSound() {
+            if (leftOscillator) {
+                leftOscillator.stop();
+                leftOscillator = null;
+            }
+            if (rightOscillator) {
+                rightOscillator.stop();
+                rightOscillator = null;
+            }
+            
+            leftGain = null;
+            rightGain = null;
+            merger = null;
+            
+            if (bpmInterval) {
+                clearInterval(bpmInterval);
+                bpmInterval = null;
+            }
+            
+            stopRandomBPM();
+            
+            isPlaying = false;
+            document.getElementById('playBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('status').textContent = '停止中';
+        }
+
+        // ページ離脱時の処理
+        window.addEventListener('beforeunload', function() {
+            if (isPlaying) {
+                stopSound();
+            }
+        });
+    </script>
+</body>
+</html>
