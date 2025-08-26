@@ -194,9 +194,34 @@
 
         .preset-buttons {
             display: flex;
-            gap: 15px;
+            gap: 30px;
             margin-bottom: 30px;
             justify-content: center;
+        }
+
+        .preset-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .preset-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .preset-section .preset-btn {
+            min-width: 150px;
+        }
+
+        .preset-btn.left-preset {
+            background: linear-gradient(135deg, #3F51B5 0%, #2196F3 100%);
+        }
+
+        .preset-btn.right-preset {
+            background: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
         }
 
         .preset-btn {
@@ -373,6 +398,121 @@
             margin-left: 5px;
         }
 
+        .volume-control {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .volume-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .volume-slider-individual {
+            width: 100%;
+            height: 4px;
+        }
+
+        .spatial-audio-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .spatial-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .spatial-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .spatial-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .spatial-btn.active {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+        }
+
+        .spatial-status {
+            font-weight: bold;
+            padding: 2px 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+        }
+
+        .spatial-visualizer {
+            width: 250px;
+            height: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .spatial-3d-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 400px;
+        }
+
+        .spatial-info {
+            text-align: center;
+            font-size: 1em;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+        }
+
+        #spatialPosition {
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .spatial-mode-switch {
+            margin-top: 10px;
+        }
+
+        .mode-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .mode-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .mode-checkbox span {
+            font-size: 0.95em;
+        }
+
         .bpm-section {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
@@ -441,6 +581,36 @@
             opacity: 0.9;
         }
 
+        .height-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .height-slider {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* WebKit */
+            width: 30px;
+            height: 150px;
+            background: linear-gradient(to top, #2196F3, #FF9800);
+            outline: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .height-slider:hover {
+            opacity: 1;
+        }
+
+        .height-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 150px;
+            font-size: 0.9em;
+        }
+
         @media (max-width: 600px) {
             .ear-controls {
                 grid-template-columns: 1fr;
@@ -459,6 +629,19 @@
                 width: 50px;
                 height: 50px;
             }
+            
+            .preset-buttons {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .preset-section {
+                width: 100%;
+            }
+            
+            .preset-section .preset-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -473,52 +656,55 @@
                         <stop offset="100%" style="stop-color:#00BFFF;stop-opacity:1" />
                     </linearGradient>
                 </defs>
-                <!-- Hexagon shape -->
                 <path d="M50 25 L150 25 L185 100 L150 175 L50 175 L15 100 Z" 
                       fill="none" 
                       stroke="url(#logoGradient)" 
                       stroke-width="8"/>
-                <!-- Circuit nodes and connections -->
-                <!-- Left side nodes -->
                 <circle cx="45" cy="65" r="8" fill="#2C3E50"/>
                 <circle cx="85" cy="65" r="8" fill="#2C3E50"/>
                 <line x1="53" y1="65" x2="77" y2="65" stroke="#2C3E50" stroke-width="3"/>
-                
                 <circle cx="45" cy="105" r="8" fill="#5B4B8A"/>
                 <circle cx="85" cy="105" r="8" fill="#4169E1"/>
                 <line x1="53" y1="105" x2="77" y2="105" stroke="#4B5BA0" stroke-width="3"/>
                 <line x1="45" y1="113" x2="45" y2="137" stroke="#5B4B8A" stroke-width="3"/>
                 <circle cx="45" cy="145" r="8" fill="#5B4B8A"/>
-                
-                <!-- Right side nodes -->
                 <circle cx="125" cy="65" r="8" fill="#00BFFF"/>
                 <circle cx="165" cy="65" r="8" fill="#00BFFF"/>
                 <line x1="133" y1="65" x2="157" y2="65" stroke="#00BFFF" stroke-width="3"/>
-                
-                <!-- Diagonal connection -->
                 <line x1="90" y1="110" x2="120" y2="140" stroke="#2C3E50" stroke-width="3"/>
                 <circle cx="85" cy="145" r="8" fill="#2C3E50"/>
                 <circle cx="125" cy="105" r="8" fill="#2C3E50"/>
-                
-                <!-- Vertical lines on right -->
                 <line x1="145" y1="85" x2="145" y2="137" stroke="#00BFFF" stroke-width="3"/>
                 <circle cx="145" cy="80" r="8" fill="#00BFFF"/>
                 <circle cx="145" cy="145" r="8" fill="#1E88E5"/>
-                
                 <line x1="165" y1="95" x2="165" y2="145" stroke="#00BFFF" stroke-width="3"/>
             </svg>
             <h1>バイノーラル周波数ジェネレーター</h1>
         </div>
         
         <div class="preset-buttons">
-            <button class="preset-btn" onclick="setPresetFrequency(500)">
-                <span class="preset-freq">500Hz</span>
-                <span class="preset-desc">耳石器</span>
-            </button>
-            <button class="preset-btn" onclick="setPresetFrequency(100)">
-                <span class="preset-freq">100Hz</span>
-                <span class="preset-desc">耳石器＋三半規管</span>
-            </button>
+            <div class="preset-section">
+                <div class="preset-label">左耳プリセット</div>
+                <button class="preset-btn left-preset" onclick="setPresetFrequency('left', 500)">
+                    <span class="preset-freq">500Hz</span>
+                    <span class="preset-desc">耳石器</span>
+                </button>
+                <button class="preset-btn left-preset" onclick="setPresetFrequency('left', 100)">
+                    <span class="preset-freq">100Hz</span>
+                    <span class="preset-desc">耳石器＋三半規管</span>
+                </button>
+            </div>
+            <div class="preset-section">
+                <div class="preset-label">右耳プリセット</div>
+                <button class="preset-btn right-preset" onclick="setPresetFrequency('right', 500)">
+                    <span class="preset-freq">500Hz</span>
+                    <span class="preset-desc">耳石器</span>
+                </button>
+                <button class="preset-btn right-preset" onclick="setPresetFrequency('right', 100)">
+                    <span class="preset-freq">100Hz</span>
+                    <span class="preset-desc">耳石器＋三半規管</span>
+                </button>
+            </div>
         </div>
         
         <div class="brainwave-section">
@@ -580,7 +766,7 @@
                 <div class="volume-control">
                     <label>音量: <span id="leftVolumeDisplay">70%</span></label>
                     <input type="range" class="slider volume-slider-individual" id="leftVolumeSlider" min="0" max="100" value="70" step="1">
-                </div>ft')">🔊 ON</button>
+                </div>
             </div>
             
             <div class="ear-section">
@@ -597,6 +783,10 @@
                     <button class="octave-btn" onclick="changeOctave('right', 1)">+1 Oct</button>
                 </div>
                 <button class="mute-btn" id="rightMuteBtn" onclick="toggleMute('right')">🔊 ON</button>
+                <div class="volume-control">
+                    <label>音量: <span id="rightVolumeDisplay">70%</span></label>
+                    <input type="range" class="slider volume-slider-individual" id="rightVolumeSlider" min="0" max="100" value="70" step="1">
+                </div>
             </div>
         </div>
         
@@ -628,6 +818,39 @@
             </div>
         </div>
         
+        <div class="spatial-audio-section">
+            <div class="section-title">🎭 3D音響効果</div>
+            <div class="spatial-controls">
+                <button class="spatial-btn" id="spatialBtn" onclick="toggleSpatialAudio()">
+                    <span>3D空間音響</span>
+                    <span class="spatial-status">OFF</span>
+                </button>
+                <div class="spatial-visualizer" id="spatialVisualizer">
+                    <div class="spatial-3d-container">
+                        <canvas id="spatial3DCanvas" width="230" height="230"></canvas>
+                    </div>
+                </div>
+                <div class="spatial-info">
+                    <span>位置: </span>
+                    <span id="spatialPosition">-</span>
+                </div>
+                <div class="spatial-mode-switch">
+                    <label class="mode-checkbox">
+                        <input type="checkbox" id="manualMode" onchange="toggleManualMode()">
+                        <span>手動モード</span>
+                    </label>
+                </div>
+                <div class="height-slider-container" style="display: none;" id="heightControl">
+                    <div class="height-labels">
+                        <span>上</span>
+                        <span>中</span>
+                        <span>下</span>
+                    </div>
+                    <input type="range" class="height-slider" id="heightSlider" min="-1" max="1" value="0" step="0.1" orient="vertical">
+                </div>
+            </div>
+        </div>
+        
         <div class="control-buttons">
             <button class="control-btn" id="playBtn" onclick="togglePlay()">▶ 再生</button>
             <button class="control-btn stop" id="stopBtn" onclick="stopSound()" style="display: none;">⏹ 停止</button>
@@ -649,39 +872,200 @@
         let leftMuted = false;
         let rightMuted = false;
         let masterVolume = 0.7;
+        let leftVolume = 0.7;
+        let rightVolume = 0.7;
+        let spatialAudioActive = false;
+        let spatialInterval = null;
+        let pannerNode = null;
+        let isDragging = false;
+        let manualMode = false;
+        let currentSoundX = 0;
+        let currentSoundY = 0;
+        let currentSoundZ = 0;
+        let canvas = null;
+        let ctx = null;
+        let lowpassFilter = null;
+        let highpassFilter = null;
 
-        // プリセット周波数設定
-        function setPresetFrequency(freq) {
-            // 両耳に同じ周波数を設定（わずかな差を付ける）
-            document.getElementById('leftFreq').value = freq;
-            document.getElementById('rightFreq').value = freq + 8; // 8Hzの差でアルファ波を生成
-            
-            document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
-            document.getElementById('rightFreqDisplay').textContent = (freq + 8) + ' Hz';
-            
+        // キャンバスの初期化
+        window.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('spatial3DCanvas');
+            ctx = canvas.getContext('2d');
             updateFrequencyDifference();
+            draw3DSpace();
             
-            if (isPlaying) {
-                if (leftOscillator) {
-                    leftOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            // マウス/タッチイベントの設定
+            canvas.addEventListener('mousedown', startDrag);
+            canvas.addEventListener('mousemove', drag);
+            canvas.addEventListener('mouseup', endDrag);
+            canvas.addEventListener('mouseleave', endDrag);
+            canvas.addEventListener('touchstart', startDrag);
+            canvas.addEventListener('touchmove', drag);
+            canvas.addEventListener('touchend', endDrag);
+        });
+
+        // 3D空間の描画
+        function draw3DSpace() {
+            if (!ctx) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 背景グリッド
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            
+            // 円形グリッド
+            for (let r = 20; r <= 100; r += 20) {
+                ctx.beginPath();
+                ctx.arc(115, 115, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // 十字線
+            ctx.beginPath();
+            ctx.moveTo(115, 15);
+            ctx.lineTo(115, 215);
+            ctx.moveTo(15, 115);
+            ctx.lineTo(215, 115);
+            ctx.stroke();
+            
+            // ラベル
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('前', 115, 12);
+            ctx.fillText('後', 115, 228);
+            ctx.fillText('左', 8, 118);
+            ctx.fillText('右', 222, 118);
+            
+            // リスナー位置（中心）
+            ctx.fillStyle = '#4CAF50';
+            ctx.beginPath();
+            ctx.arc(115, 115, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.fillText('YOU', 115, 119);
+            
+            // 音源の位置
+            if (spatialAudioActive) {
+                const x = 115 + currentSoundX * 100;
+                const y = 115 - currentSoundZ * 100;
+                const size = 8 + Math.abs(currentSoundY) * 6; // 高さで大きさを変える
+                
+                // 位置による色の変化（より明確に）
+                let hue, saturation, lightness;
+                
+                if (currentSoundY > 0.3) {
+                    // 上：オレンジ〜黄色（明るい）
+                    hue = 30 + currentSoundY * 30;
+                    saturation = 80;
+                    lightness = 60 + currentSoundY * 10;
+                } else if (currentSoundY < -0.3) {
+                    // 下：青〜紫（深い）
+                    hue = 220 - currentSoundY * 40;
+                    saturation = 70;
+                    lightness = 40 - currentSoundY * 10;
+                } else {
+                    // 中間：緑系
+                    hue = 120;
+                    saturation = 60;
+                    lightness = 50;
                 }
-                if (rightOscillator) {
-                    rightOscillator.frequency.setValueAtTime(freq + 8, audioContext.currentTime);
+                
+                // 前後で明度も調整
+                if (currentSoundZ < 0) {
+                    lightness -= 15; // 後ろは暗く
+                } else {
+                    lightness += 10; // 前は明るく
                 }
+                
+                ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness - 20}%)`;
+                ctx.lineWidth = 3;
+                
+                // 音源マーカー
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // パルスエフェクト（複数の波紋）
+                for (let i = 1; i <= 3; i++) {
+                    ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${0.4 / i})`;
+                    ctx.lineWidth = 2 / i;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size + (i * 8), 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // 高さインジケーター
+                if (Math.abs(currentSoundY) > 0.1) {
+                    ctx.save();
+                    ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.8)`;
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.textAlign = 'center';
+                    const heightText = currentSoundY > 0 ? '▲' : '▼';
+                    ctx.fillText(heightText, x, y - size - 5);
+                    ctx.restore();
+                }
+            }
+            
+            requestAnimationFrame(draw3DSpace);
+        }
+
+        // フルスクリーン設定
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
             }
         }
 
-        // 脳波プリセット設定
+        // 初期化
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // プリセット周波数設定（左右別々）
+        function setPresetFrequency(ear, freq) {
+            if (ear === 'left') {
+                document.getElementById('leftFreq').value = freq;
+                document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
+                
+                if (isPlaying && leftOscillator) {
+                    leftOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                }
+            } else if (ear === 'right') {
+                document.getElementById('rightFreq').value = freq;
+                document.getElementById('rightFreqDisplay').textContent = freq + ' Hz';
+                
+                if (isPlaying && rightOscillator) {
+                    rightOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                }
+            }
+            
+            updateFrequencyDifference();
+        }
+
+        // 脳波プリセット設定（左耳の現在値をベースに）
         function setBrainwavePreset(waveType) {
-            const baseFreq = 200; // 基準周波数
+            // 現在の左耳の周波数を基準にする
+            const baseFreq = parseFloat(document.getElementById('leftFreq').value);
             let difference = 0;
             
             switch(waveType) {
                 case 'delta':
-                    difference = 2; // 2Hz差（デルタ波）
+                    difference = 2;  // 2Hz差（デルタ波）
                     break;
                 case 'theta':
-                    difference = 6; // 6Hz差（シータ波）
+                    difference = 6;  // 6Hz差（シータ波）
                     break;
                 case 'alpha':
                     difference = 10; // 10Hz差（アルファ波）
@@ -694,31 +1078,44 @@
                     break;
             }
             
-            document.getElementById('leftFreq').value = baseFreq;
-            document.getElementById('rightFreq').value = baseFreq + difference;
+            // 右耳の周波数を設定（左耳 + 差分）
+            const rightFreq = baseFreq + difference;
             
-            document.getElementById('leftFreqDisplay').textContent = baseFreq + ' Hz';
-            document.getElementById('rightFreqDisplay').textContent = (baseFreq + difference) + ' Hz';
+            // 周波数範囲内に収める
+            const adjustedRightFreq = Math.max(20, Math.min(20000, rightFreq));
+            
+            document.getElementById('rightFreq').value = adjustedRightFreq;
+            document.getElementById('rightFreqDisplay').textContent = adjustedRightFreq + ' Hz';
             
             updateFrequencyDifference();
             
             if (isPlaying) {
-                if (leftOscillator) {
-                    leftOscillator.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
-                }
                 if (rightOscillator) {
-                    rightOscillator.frequency.setValueAtTime(baseFreq + difference, audioContext.currentTime);
+                    rightOscillator.frequency.setValueAtTime(adjustedRightFreq, audioContext.currentTime);
                 }
             }
             
             // ボタンのハイライト効果
             document.querySelectorAll('.brainwave-btn').forEach(btn => {
                 btn.style.transform = 'scale(1)';
+                btn.style.opacity = '1';
             });
             event.target.closest('.brainwave-btn').style.transform = 'scale(1.05)';
+            event.target.closest('.brainwave-btn').style.opacity = '1';
+            
+            // フィードバックメッセージ（視覚的確認）
+            const status = document.getElementById('status');
+            const originalText = status.textContent;
+            status.textContent = `${waveType.charAt(0).toUpperCase() + waveType.slice(1)}波設定: ${baseFreq}Hz → ${adjustedRightFreq}Hz`;
+            
+            if (originalText === '再生中...') {
+                setTimeout(() => {
+                    status.textContent = originalText;
+                }, 2000);
+            }
         }
 
-        // 周波数差の更新と脳波タイプの判定
+        // 周波数差の更新
         function updateFrequencyDifference() {
             const leftFreq = parseFloat(document.getElementById('leftFreq').value);
             const rightFreq = parseFloat(document.getElementById('rightFreq').value);
@@ -744,75 +1141,6 @@
             }
             
             document.getElementById('currentWaveType').textContent = waveType;
-        }
-
-        // マスターボリューム調整
-        document.getElementById('volumeSlider').addEventListener('input', function() {
-            masterVolume = this.value / 100;
-            document.getElementById('volumeDisplay').textContent = this.value + '%';
-            
-            if (isPlaying) {
-                updateVolume();
-            }
-        });
-
-        // ボリューム更新
-        function updateVolume() {
-            if (leftGain && !leftMuted) {
-                leftGain.gain.setValueAtTime(0.3 * masterVolume, audioContext.currentTime);
-            }
-            if (rightGain && !rightMuted) {
-                rightGain.gain.setValueAtTime(0.3 * masterVolume, audioContext.currentTime);
-            }
-        }
-
-        // ミュート切り替え
-        function toggleMute(ear) {
-            const btn = ear === 'left' ? document.getElementById('leftMuteBtn') : document.getElementById('rightMuteBtn');
-            const gain = ear === 'left' ? leftGain : rightGain;
-            
-            if (ear === 'left') {
-                leftMuted = !leftMuted;
-                if (leftMuted) {
-                    btn.textContent = '🔇 OFF';
-                    btn.classList.add('muted');
-                    if (gain) gain.gain.value = 0;
-                } else {
-                    btn.textContent = '🔊 ON';
-                    btn.classList.remove('muted');
-                    if (gain) gain.gain.value = 0.3 * masterVolume;
-                }
-            } else {
-                rightMuted = !rightMuted;
-                if (rightMuted) {
-                    btn.textContent = '🔇 OFF';
-                    btn.classList.add('muted');
-                    if (gain) gain.gain.value = 0;
-                } else {
-                    btn.textContent = '🔊 ON';
-                    btn.classList.remove('muted');
-                    if (gain) gain.gain.value = 0.3 * masterVolume;
-                }
-            }
-        }
-
-        // フルスクリーン設定
-        function enterFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
-        }
-
-        // 初期化
-        function initAudio() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
         }
 
         // 周波数表示の更新
@@ -843,6 +1171,44 @@
             }
         });
 
+        // 音量調整
+        document.getElementById('volumeSlider').addEventListener('input', function() {
+            masterVolume = this.value / 100;
+            document.getElementById('volumeDisplay').textContent = this.value + '%';
+            
+            if (isPlaying) {
+                updateVolume();
+            }
+        });
+
+        document.getElementById('leftVolumeSlider').addEventListener('input', function() {
+            leftVolume = this.value / 100;
+            document.getElementById('leftVolumeDisplay').textContent = this.value + '%';
+            
+            if (isPlaying && leftGain && !leftMuted) {
+                leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
+            }
+        });
+
+        document.getElementById('rightVolumeSlider').addEventListener('input', function() {
+            rightVolume = this.value / 100;
+            document.getElementById('rightVolumeDisplay').textContent = this.value + '%';
+            
+            if (isPlaying && rightGain && !rightMuted) {
+                rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
+            }
+        });
+
+        // ボリューム更新
+        function updateVolume() {
+            if (leftGain && !leftMuted) {
+                leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
+            }
+            if (rightGain && !rightMuted) {
+                rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
+            }
+        }
+
         // オクターブ変更
         function changeOctave(ear, direction) {
             const slider = ear === 'left' ? document.getElementById('leftFreq') : document.getElementById('rightFreq');
@@ -857,7 +1223,6 @@
                 newFreq = currentFreq / 2;
             }
             
-            // 周波数範囲内に収める
             newFreq = Math.max(20, Math.min(20000, newFreq));
             
             slider.value = newFreq;
@@ -870,6 +1235,36 @@
                     leftOscillator.frequency.setValueAtTime(newFreq, audioContext.currentTime);
                 } else if (ear === 'right' && rightOscillator) {
                     rightOscillator.frequency.setValueAtTime(newFreq, audioContext.currentTime);
+                }
+            }
+        }
+
+        // ミュート切り替え
+        function toggleMute(ear) {
+            const btn = ear === 'left' ? document.getElementById('leftMuteBtn') : document.getElementById('rightMuteBtn');
+            const gain = ear === 'left' ? leftGain : rightGain;
+            
+            if (ear === 'left') {
+                leftMuted = !leftMuted;
+                if (leftMuted) {
+                    btn.textContent = '🔇 OFF';
+                    btn.classList.add('muted');
+                    if (gain) gain.gain.value = 0;
+                } else {
+                    btn.textContent = '🔊 ON';
+                    btn.classList.remove('muted');
+                    if (gain) gain.gain.value = 0.3 * masterVolume * leftVolume;
+                }
+            } else {
+                rightMuted = !rightMuted;
+                if (rightMuted) {
+                    btn.textContent = '🔇 OFF';
+                    btn.classList.add('muted');
+                    if (gain) gain.gain.value = 0;
+                } else {
+                    btn.textContent = '🔊 ON';
+                    btn.classList.remove('muted');
+                    if (gain) gain.gain.value = 0.3 * masterVolume * rightVolume;
                 }
             }
         }
@@ -888,16 +1283,16 @@
                     
                     if (!leftMuted) {
                         leftGain.gain.cancelScheduledValues(now);
-                        leftGain.gain.setValueAtTime(0.3 * masterVolume, now);
+                        leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, now);
                         leftGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                        leftGain.gain.exponentialRampToValueAtTime(0.3 * masterVolume, now + 0.1);
+                        leftGain.gain.exponentialRampToValueAtTime(0.3 * masterVolume * leftVolume, now + 0.1);
                     }
                     
                     if (!rightMuted) {
                         rightGain.gain.cancelScheduledValues(now);
-                        rightGain.gain.setValueAtTime(0.3 * masterVolume, now);
+                        rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, now);
                         rightGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                        rightGain.gain.exponentialRampToValueAtTime(0.3 * masterVolume, now + 0.1);
+                        rightGain.gain.exponentialRampToValueAtTime(0.3 * masterVolume * rightVolume, now + 0.1);
                     }
                 }
             }, interval);
@@ -928,6 +1323,245 @@
             }
         }
 
+        // 3D音響効果のトグル
+        function toggleSpatialAudio() {
+            const btn = document.getElementById('spatialBtn');
+            const status = btn.querySelector('.spatial-status');
+            const heightControl = document.getElementById('heightControl');
+            
+            if (!spatialAudioActive) {
+                spatialAudioActive = true;
+                btn.classList.add('active');
+                status.textContent = 'ON';
+                heightControl.style.display = 'flex';
+                
+                if (isPlaying) {
+                    stopSound();
+                    setTimeout(() => {
+                        startSound();
+                    }, 100);
+                }
+            } else {
+                spatialAudioActive = false;
+                btn.classList.remove('active');
+                status.textContent = 'OFF';
+                heightControl.style.display = 'none';
+                
+                if (spatialInterval) {
+                    clearInterval(spatialInterval);
+                    spatialInterval = null;
+                }
+                
+                if (isPlaying) {
+                    stopSound();
+                    setTimeout(() => {
+                        startSound();
+                    }, 100);
+                }
+            }
+        }
+
+        // 手動モードのトグル
+        function toggleManualMode() {
+            manualMode = document.getElementById('manualMode').checked;
+            
+            if (spatialAudioActive && isPlaying) {
+                if (manualMode) {
+                    if (spatialInterval) {
+                        clearInterval(spatialInterval);
+                        spatialInterval = null;
+                    }
+                } else {
+                    updateSpatialPosition();
+                    spatialInterval = setInterval(() => {
+                        updateSpatialPosition();
+                    }, 2000);
+                }
+            }
+        }
+
+        // 高さスライダーの処理
+        document.getElementById('heightSlider')?.addEventListener('input', function() {
+            currentSoundY = parseFloat(this.value);
+            if (manualMode && spatialAudioActive) {
+                setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+            }
+        });
+
+        // ドラッグ操作
+        function startDrag(event) {
+            if (!spatialAudioActive || !manualMode) return;
+            isDragging = true;
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            if (!isDragging || !spatialAudioActive || !manualMode) return;
+            
+            event.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            
+            let x, y;
+            if (event.type.includes('touch')) {
+                x = ((event.touches[0].clientX - rect.left) / rect.width) * 230;
+                y = ((event.touches[0].clientY - rect.top) / rect.height) * 230;
+            } else {
+                x = ((event.clientX - rect.left) / rect.width) * 230;
+                y = ((event.clientY - rect.top) / rect.height) * 230;
+            }
+            
+            // 中心を原点とした座標に変換
+            const dx = (x - 115) / 100;
+            const dz = -(y - 115) / 100;
+            
+            // 円内に制限
+            const distance = Math.sqrt(dx * dx + dz * dz);
+            if (distance <= 1) {
+                currentSoundX = dx;
+                currentSoundZ = dz;
+                setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+            }
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        // 音源位置を設定（PannerNodeを使用）
+        function setSoundPosition(x, y, z) {
+            if (!pannerNode || !isPlaying) return;
+            
+            // PannerNodeの位置設定
+            pannerNode.positionX.setValueAtTime(x * 2, audioContext.currentTime);
+            pannerNode.positionY.setValueAtTime(y * 2, audioContext.currentTime);
+            pannerNode.positionZ.setValueAtTime(z * 2, audioContext.currentTime);
+            
+            // 前後と上下の効果を強化
+            if (lowpassFilter && highpassFilter) {
+                // 前後の効果（前は明瞭、後ろは大幅にこもる）
+                let lowpassFreq = 20000;
+                let highpassFreq = 20;
+                
+                if (z < 0) {
+                    // 後方：低音を強調、高音をカット
+                    lowpassFreq = 2000 - (Math.abs(z) * 1500); // 500-2000Hz
+                    highpassFreq = 20;
+                } else {
+                    // 前方：高音を強調、明瞭に
+                    lowpassFreq = 15000 + (z * 5000); // 15000-20000Hz
+                    highpassFreq = 50 + (z * 50); // 50-100Hz
+                }
+                
+                // 上下の効果（上は高音強調、下は低音強調）
+                if (y > 0) {
+                    // 上方：高音域を強調（きらびやか）
+                    lowpassFreq = Math.min(20000, lowpassFreq + (y * 3000));
+                    highpassFreq = Math.max(20, highpassFreq + (y * 100)); // 高音を通す
+                } else if (y < 0) {
+                    // 下方：低音域を強調（重厚）
+                    lowpassFreq = Math.max(1000, lowpassFreq + (y * 5000)); // より低くカット
+                    highpassFreq = Math.max(20, highpassFreq + (y * 30)); // 低音を保持
+                }
+                
+                lowpassFilter.frequency.setValueAtTime(lowpassFreq, audioContext.currentTime);
+                highpassFilter.frequency.setValueAtTime(highpassFreq, audioContext.currentTime);
+                
+                // Q値も調整して効果を強化
+                const qValue = Math.abs(z) * 2 + Math.abs(y) * 1.5 + 0.5;
+                lowpassFilter.Q.setValueAtTime(qValue, audioContext.currentTime);
+                
+                // 音量も位置によって調整
+                if (leftGain && rightGain) {
+                    // 前後による音量変化（後ろは小さく）
+                    const depthVolume = z < 0 ? (1 + z * 0.4) : 1; // 後方で最大40%減
+                    
+                    // 上下による音量変化（上は小さく、下は大きく）
+                    const heightVolume = y > 0 ? (1 - y * 0.3) : (1 - y * 0.2); // 上で30%減、下で20%増
+                    
+                    // 距離による減衰
+                    const distance = Math.sqrt(x*x + y*y + z*z);
+                    const distanceVolume = Math.max(0.3, 1 - distance * 0.5);
+                    
+                    const finalVolume = 0.3 * masterVolume * depthVolume * heightVolume * distanceVolume;
+                    
+                    if (!leftMuted) {
+                        leftGain.gain.setValueAtTime(finalVolume * leftVolume, audioContext.currentTime);
+                    }
+                    if (!rightMuted) {
+                        rightGain.gain.setValueAtTime(finalVolume * rightVolume, audioContext.currentTime);
+                    }
+                }
+            }
+            
+            // リバーブ効果のシミュレーション（簡易版）
+            if (pannerNode) {
+                // 後方や上方にある時は残響を増やす
+                const reverbAmount = (Math.abs(z) < 0 ? Math.abs(z) : 0) + (y > 0 ? y * 0.5 : 0);
+                
+                // コーンの設定で指向性を追加
+                if (z < 0) {
+                    // 後方：音が広がる
+                    pannerNode.coneInnerAngle = 360;
+                    pannerNode.coneOuterAngle = 360;
+                    pannerNode.coneOuterGain = 0.8;
+                } else {
+                    // 前方：音が集中
+                    pannerNode.coneInnerAngle = 180;
+                    pannerNode.coneOuterAngle = 270;
+                    pannerNode.coneOuterGain = 0.6;
+                }
+            }
+            
+            // 位置情報の更新
+            updatePositionDisplay(x, y, z);
+        }
+
+        // 位置表示を更新
+        function updatePositionDisplay(x, y, z) {
+            let position = '';
+            
+            // 水平方向
+            if (Math.abs(x) > 0.3) {
+                position += x > 0 ? '右' : '左';
+            }
+            
+            // 前後方向
+            if (Math.abs(z) > 0.3) {
+                position += z > 0 ? '前' : '後';
+            }
+            
+            // 高さ
+            let height = '';
+            if (Math.abs(y) > 0.3) {
+                height = y > 0 ? '上' : '下';
+            } else {
+                height = '中';
+            }
+            
+            if (position === '') position = '中央';
+            
+            const distance = Math.sqrt(x*x + y*y + z*z);
+            const distanceText = distance < 0.5 ? '近' : distance < 1 ? '中' : '遠';
+            
+            document.getElementById('spatialPosition').textContent = `${position} (高さ:${height}, 距離:${distanceText})`;
+        }
+
+        // 空間位置の更新（ランダム）
+        function updateSpatialPosition() {
+            if (!spatialAudioActive || manualMode) return;
+            
+            // ランダムな3D位置を生成
+            const theta = Math.random() * Math.PI * 2;
+            const phi = (Math.random() - 0.5) * Math.PI;
+            const radius = 0.3 + Math.random() * 0.7;
+            
+            currentSoundX = Math.cos(theta) * Math.cos(phi) * radius;
+            currentSoundY = Math.sin(phi) * radius;
+            currentSoundZ = Math.sin(theta) * Math.cos(phi) * radius;
+            
+            setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+        }
+
         // 再生/停止
         function togglePlay() {
             if (!isPlaying) {
@@ -945,31 +1579,85 @@
             const rightFreq = parseFloat(document.getElementById('rightFreq').value);
             const bpm = parseFloat(document.getElementById('bpmSlider').value);
             
-            // 左チャンネル
+            // オシレーターとゲインノード作成
             leftOscillator = audioContext.createOscillator();
             leftGain = audioContext.createGain();
             leftOscillator.frequency.value = leftFreq;
             leftOscillator.type = 'sine';
-            leftGain.gain.value = leftMuted ? 0 : 0.3 * masterVolume;
+            leftGain.gain.value = leftMuted ? 0 : 0.3 * masterVolume * leftVolume;
             
-            // 右チャンネル
             rightOscillator = audioContext.createOscillator();
             rightGain = audioContext.createGain();
             rightOscillator.frequency.value = rightFreq;
             rightOscillator.type = 'sine';
-            rightGain.gain.value = rightMuted ? 0 : 0.3 * masterVolume;
+            rightGain.gain.value = rightMuted ? 0 : 0.3 * masterVolume * rightVolume;
             
-            // ステレオマージャー
             merger = audioContext.createChannelMerger(2);
             
-            // 接続
-            leftOscillator.connect(leftGain);
-            leftGain.connect(merger, 0, 0);
-            
-            rightOscillator.connect(rightGain);
-            rightGain.connect(merger, 0, 1);
-            
-            merger.connect(audioContext.destination);
+            // 3D音響用の設定
+            if (spatialAudioActive) {
+                // PannerNodeの作成と設定
+                pannerNode = audioContext.createPanner();
+                pannerNode.panningModel = 'HRTF';
+                pannerNode.distanceModel = 'inverse';
+                pannerNode.refDistance = 1;
+                pannerNode.maxDistance = 10;
+                pannerNode.rolloffFactor = 1;
+                pannerNode.coneInnerAngle = 360;
+                pannerNode.coneOuterAngle = 360;
+                pannerNode.coneOuterGain = 0;
+                
+                // リスナーの設定
+                if (audioContext.listener.forwardX) {
+                    audioContext.listener.forwardX.setValueAtTime(0, audioContext.currentTime);
+                    audioContext.listener.forwardY.setValueAtTime(0, audioContext.currentTime);
+                    audioContext.listener.forwardZ.setValueAtTime(-1, audioContext.currentTime);
+                    audioContext.listener.upX.setValueAtTime(0, audioContext.currentTime);
+                    audioContext.listener.upY.setValueAtTime(1, audioContext.currentTime);
+                    audioContext.listener.upZ.setValueAtTime(0, audioContext.currentTime);
+                }
+                
+                // フィルターの作成（前後と上下の効果用）
+                lowpassFilter = audioContext.createBiquadFilter();
+                lowpassFilter.type = 'lowpass';
+                lowpassFilter.frequency.value = 20000;
+                lowpassFilter.Q.value = 0.5;
+                
+                highpassFilter = audioContext.createBiquadFilter();
+                highpassFilter.type = 'highpass';
+                highpassFilter.frequency.value = 20;
+                highpassFilter.Q.value = 0.5;
+                
+                // 追加のフィルター（より豊かな効果のため）
+                const compressor = audioContext.createDynamicsCompressor();
+                compressor.threshold.value = -24;
+                compressor.knee.value = 30;
+                compressor.ratio.value = 12;
+                compressor.attack.value = 0.003;
+                compressor.release.value = 0.25;
+                
+                // 接続（3D音響経由）
+                leftOscillator.connect(leftGain);
+                leftGain.connect(merger, 0, 0);
+                
+                rightOscillator.connect(rightGain);
+                rightGain.connect(merger, 0, 1);
+                
+                merger.connect(lowpassFilter);
+                lowpassFilter.connect(highpassFilter);
+                highpassFilter.connect(compressor);
+                compressor.connect(pannerNode);
+                pannerNode.connect(audioContext.destination);
+            } else {
+                // 通常の接続
+                leftOscillator.connect(leftGain);
+                leftGain.connect(merger, 0, 0);
+                
+                rightOscillator.connect(rightGain);
+                rightGain.connect(merger, 0, 1);
+                
+                merger.connect(audioContext.destination);
+            }
             
             // 開始
             leftOscillator.start();
@@ -979,6 +1667,20 @@
             
             if (document.getElementById('randomBpm').checked) {
                 startRandomBPM();
+            }
+            
+            // 3D音響が有効な場合
+            if (spatialAudioActive) {
+                setTimeout(() => {
+                    if (!manualMode) {
+                        updateSpatialPosition();
+                        spatialInterval = setInterval(() => {
+                            updateSpatialPosition();
+                        }, 2000);
+                    } else {
+                        setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+                    }
+                }, 100);
             }
             
             isPlaying = true;
@@ -1000,6 +1702,9 @@
             leftGain = null;
             rightGain = null;
             merger = null;
+            pannerNode = null;
+            lowpassFilter = null;
+            highpassFilter = null;
             
             if (bpmInterval) {
                 clearInterval(bpmInterval);
@@ -1007,6 +1712,11 @@
             }
             
             stopRandomBPM();
+            
+            if (spatialInterval) {
+                clearInterval(spatialInterval);
+                spatialInterval = null;
+            }
             
             isPlaying = false;
             document.getElementById('playBtn').style.display = 'inline-block';
@@ -1019,11 +1729,6 @@
             if (isPlaying) {
                 stopSound();
             }
-        });
-
-        // 初期表示時に周波数差を更新
-        window.addEventListener('DOMContentLoaded', function() {
-            updateFrequencyDifference();
         });
     </script>
 </body>
