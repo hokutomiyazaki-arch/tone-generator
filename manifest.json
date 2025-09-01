@@ -1,0 +1,31 @@
+{
+  "name": "バイノーラル周波数ジェネレーター - Functional Neuro Training",
+  "short_name": "FNT Generator",
+  "description": "3D空間音響対応のバイノーラル周波数ジェネレーター",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "start_url": "./index.html",
+  "scope": "./",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["medical", "health", "productivity"],
+  "lang": "ja"
+}
