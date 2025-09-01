@@ -14,13 +14,14 @@
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512.png">
     
     <script>
-        // Service Worker登録
-        if ('serviceWorker' in navigator) {
+        // Service Worker登録（本番環境のみ）
+        if ('serviceWorker' in navigator && !window.location.hostname.includes('claude')) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('sw.js').then(function(registration) {
                     console.log('ServiceWorker registration successful');
                 }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
+                    // エラーは無視（開発環境では正常）
+                    console.log('ServiceWorker registration skipped');
                 });
             });
         }
