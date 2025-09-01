@@ -2,551 +2,217 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>バイノーラル周波数ジェネレーター</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <title>バイノーラル周波数ジェネレーター - FNT</title>
+    
+    <!-- PWA対応 -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi44OQ44Kk44OO44O844Op44Or5ZGo5rOi5pWw44K444Kn44ON44Os44O844K/44O8Iiwic2hvcnRfbmFtZSI6IkJpbmF1cmFsIEZOVCIsImRpc3BsYXkiOiJmdWxsc2NyZWVuIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsInN0YXJ0X3VybCI6Ii4iLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzY2N2VlYSIsInRoZW1lX2NvbG9yIjoiIzY2N2VlYSIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vaG9rdXRvbWl5YXpha2ktYXJjaC90b25lLWdlbmVyYXRvci9tYWluL0ZOVDUxMi5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ==">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512.png">
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
             color: white;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 800px;
+        /* スプラッシュスクリーン */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .brand-logo {
-            width: 60px;
-            height: 60px;
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .logo-header h1 {
-            margin: 0;
-            font-size: 2.2em;
-        }
-
-        .ear-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .ear-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            transition: transform 0.3s;
-        }
-
-        .ear-section:hover {
-            transform: translateY(-5px);
-        }
-
-        .ear-label {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .ear-icon {
-            font-size: 1.5em;
-        }
-
-        .freq-display {
-            font-size: 2em;
-            font-weight: bold;
-            margin: 15px 0;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .slider-container {
-            margin: 20px 0;
-        }
-
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255, 255, 255, 0.3);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .octave-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .octave-btn {
-            flex: 1;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 8px;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .octave-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-
-        .octave-btn:active {
-            transform: scale(0.95);
-        }
-
-        .mute-btn {
-            width: 100%;
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(76, 175, 80, 0.3);
-            border: 2px solid rgba(76, 175, 80, 0.6);
-            border-radius: 8px;
-            color: white;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-
-        .mute-btn:hover {
-            background: rgba(76, 175, 80, 0.4);
-            transform: scale(1.02);
-        }
-
-        .mute-btn.muted {
-            background: rgba(244, 67, 54, 0.3);
-            border-color: rgba(244, 67, 54, 0.6);
-        }
-
-        .mute-btn.muted:hover {
-            background: rgba(244, 67, 54, 0.4);
-        }
-
-        .preset-buttons {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-
-        .preset-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .preset-label {
-            font-size: 0.9em;
-            opacity: 0.8;
-            text-align: center;
-        }
-
-        .preset-section .preset-btn {
-            min-width: 150px;
-        }
-
-        .preset-btn.left-preset {
-            background: linear-gradient(135deg, #3F51B5 0%, #2196F3 100%);
-        }
-
-        .preset-btn.right-preset {
-            background: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
-        }
-
-        .preset-btn {
+            height: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 15px;
-            padding: 15px 30px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 5px;
+            z-index: 10000;
+            transition: opacity 0.5s ease-out;
         }
 
-        .preset-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
-        .preset-btn:active {
-            transform: translateY(0);
+        .splash-logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .preset-freq {
-            font-size: 1.4em;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .splash-title {
+            font-size: 1.8em;
             font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
         }
 
-        .preset-desc {
-            font-size: 0.9em;
+        .splash-subtitle {
+            font-size: 1.2em;
+            margin-bottom: 20px;
             opacity: 0.9;
         }
 
-        .volume-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .volume-display {
-            font-size: 1.8em;
-            text-align: center;
-            margin: 15px 0;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .volume-slider {
-            background: linear-gradient(to right, 
-                rgba(255, 255, 255, 0.3) 0%, 
-                rgba(76, 175, 80, 0.5) 50%, 
-                rgba(255, 193, 7, 0.5) 80%, 
-                rgba(244, 67, 54, 0.5) 100%);
-        }
-
-        .volume-indicators {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+        .splash-copyright {
             font-size: 0.9em;
-            opacity: 0.8;
+            opacity: 0.7;
+            position: absolute;
+            bottom: 30px;
         }
 
-        .brainwave-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .brainwave-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .brainwave-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
+        /* メインアプリ */
+        .app-container {
+            width: 100%;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ヘッダー */
+        .app-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            text-align: center;
-            gap: 5px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 100;
         }
 
-        .brainwave-btn:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .brainwave-btn.delta {
-            border-color: #9C27B0;
-            background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.1));
+        .fnt-logo {
+            width: 40px;
+            height: 40px;
         }
 
-        .brainwave-btn.theta {
-            border-color: #673AB7;
-            background: linear-gradient(135deg, rgba(103, 58, 183, 0.2), rgba(103, 58, 183, 0.1));
-        }
-
-        .brainwave-btn.alpha {
-            border-color: #2196F3;
-            background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(33, 150, 243, 0.1));
-        }
-
-        .brainwave-btn.beta {
-            border-color: #4CAF50;
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
-        }
-
-        .brainwave-btn.gamma {
-            border-color: #FF9800;
-            background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 152, 0, 0.1));
-        }
-
-        .wave-name {
+        .app-title {
             font-size: 1.2em;
             font-weight: bold;
         }
 
-        .wave-freq {
-            font-size: 1em;
-            opacity: 0.9;
-            color: #FFD700;
-        }
-
-        .wave-desc {
-            font-size: 0.9em;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-
-        .wave-effect {
-            font-size: 0.8em;
-            opacity: 0.8;
-            margin-top: 3px;
-        }
-
-        .frequency-difference {
-            text-align: center;
-            font-size: 1.1em;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
             border-radius: 8px;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
 
-        #freqDifference {
-            font-weight: bold;
-            color: #FFD700;
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        #currentWaveType {
-            opacity: 0.9;
-            margin-left: 5px;
-        }
-
-        .volume-control {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
-
-        .volume-control label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-        }
-
-        .volume-slider-individual {
-            width: 100%;
-            height: 4px;
-        }
-
-        .spatial-audio-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .spatial-controls {
+        /* メインコンテンツ */
+        .main-content {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .spatial-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s;
+        /* プレイ画面 */
+        .play-screen {
+            flex: 1;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .spatial-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .spatial-btn.active {
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-        }
-
-        .spatial-status {
-            font-weight: bold;
-            padding: 2px 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-        }
-
-        .spatial-visualizer {
-            width: 250px;
-            height: 250px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 10px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 20px;
             position: relative;
         }
 
-        .spatial-3d-container {
+        .visualizer-container {
+            width: 280px;
+            height: 280px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        #spatial3DCanvas {
             width: 100%;
             height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            perspective: 400px;
-        }
-
-        .spatial-info {
-            text-align: center;
-            font-size: 1em;
-            padding: 8px 16px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
-        }
-
-        #spatialPosition {
-            font-weight: bold;
-            color: #FFD700;
-        }
-
-        .spatial-mode-switch {
-            margin-top: 10px;
-        }
-
-        .mode-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .mode-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .mode-checkbox span {
-            font-size: 0.95em;
-        }
-
-        .bpm-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .bpm-display {
-            font-size: 1.8em;
-            text-align: center;
-            margin: 15px 0;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
             border-radius: 10px;
         }
 
-        .checkbox-container {
+        .frequency-display {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
         }
 
-        .checkbox-container input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
+        .freq-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+
+        .freq-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .freq-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #FFD700;
         }
 
         .control-buttons {
             display: flex;
             gap: 15px;
-            justify-content: center;
         }
 
         .control-btn {
@@ -566,300 +232,426 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .control-btn:active {
-            transform: translateY(0);
-        }
-
         .control-btn.stop {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
-        .status {
-            text-align: center;
+        .spatial-info {
             margin-top: 20px;
+            text-align: center;
             font-size: 1.1em;
-            opacity: 0.9;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
         }
 
-        .height-slider-container {
+        #spatialPosition {
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        /* サイドメニュー */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 400px;
+            height: 100%;
+            background: rgba(30, 30, 50, 0.98);
+            backdrop-filter: blur(20px);
+            transition: right 0.3s ease-out;
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .side-menu.open {
+            right: 0;
+        }
+
+        .menu-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .menu-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .menu-close {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .menu-content {
+            padding: 20px;
+        }
+
+        .menu-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-top: 10px;
+            gap: 8px;
         }
 
-        .height-slider {
-            writing-mode: bt-lr; /* IE */
-            -webkit-appearance: slider-vertical; /* WebKit */
-            width: 30px;
-            height: 150px;
-            background: linear-gradient(to top, #2196F3, #FF9800);
-            outline: none;
-            opacity: 0.8;
-            transition: opacity 0.2s;
+        /* フォーム要素 */
+        .slider-container {
+            margin: 15px 0;
         }
 
-        .height-slider:hover {
-            opacity: 1;
-        }
-
-        .height-labels {
+        .slider-label {
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
-            height: 150px;
+            margin-bottom: 8px;
             font-size: 0.9em;
         }
 
-        @media (max-width: 600px) {
-            .ear-controls {
-                grid-template-columns: 1fr;
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .wave-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .wave-btn {
+            flex: 1;
+            min-width: calc(50% - 4px);
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .wave-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* オーバーレイ */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 999;
+        }
+
+        .menu-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* フッター */
+        .app-footer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 480px) {
+            .app-title {
+                font-size: 1em;
             }
             
-            .logo-header {
+            .frequency-display {
                 flex-direction: column;
-                gap: 10px;
+                gap: 15px;
             }
             
-            .logo-header h1 {
-                font-size: 1.8em;
-            }
-            
-            .brand-logo {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .preset-buttons {
+            .control-buttons {
                 flex-direction: column;
-                gap: 20px;
-            }
-            
-            .preset-section {
                 width: 100%;
             }
             
-            .preset-section .preset-btn {
+            .control-btn {
                 width: 100%;
+            }
+        }
+
+        /* iOS対応 */
+        @supports (-webkit-touch-callout: none) {
+            .app-container {
+                height: 100vh;
+                height: -webkit-fill-available;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-header">
-            <svg class="brand-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#6B46C1;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#4169E1;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#00BFFF;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                <path d="M50 25 L150 25 L185 100 L150 175 L50 175 L15 100 Z" 
-                      fill="none" 
-                      stroke="url(#logoGradient)" 
-                      stroke-width="8"/>
-                <circle cx="45" cy="65" r="8" fill="#2C3E50"/>
-                <circle cx="85" cy="65" r="8" fill="#2C3E50"/>
-                <line x1="53" y1="65" x2="77" y2="65" stroke="#2C3E50" stroke-width="3"/>
-                <circle cx="45" cy="105" r="8" fill="#5B4B8A"/>
-                <circle cx="85" cy="105" r="8" fill="#4169E1"/>
-                <line x1="53" y1="105" x2="77" y2="105" stroke="#4B5BA0" stroke-width="3"/>
-                <line x1="45" y1="113" x2="45" y2="137" stroke="#5B4B8A" stroke-width="3"/>
-                <circle cx="45" cy="145" r="8" fill="#5B4B8A"/>
-                <circle cx="125" cy="65" r="8" fill="#00BFFF"/>
-                <circle cx="165" cy="65" r="8" fill="#00BFFF"/>
-                <line x1="133" y1="65" x2="157" y2="65" stroke="#00BFFF" stroke-width="3"/>
-                <line x1="90" y1="110" x2="120" y2="140" stroke="#2C3E50" stroke-width="3"/>
-                <circle cx="85" cy="145" r="8" fill="#2C3E50"/>
-                <circle cx="125" cy="105" r="8" fill="#2C3E50"/>
-                <line x1="145" y1="85" x2="145" y2="137" stroke="#00BFFF" stroke-width="3"/>
-                <circle cx="145" cy="80" r="8" fill="#00BFFF"/>
-                <circle cx="145" cy="145" r="8" fill="#1E88E5"/>
-                <line x1="165" y1="95" x2="165" y2="145" stroke="#00BFFF" stroke-width="3"/>
-            </svg>
-            <h1>バイノーラル周波数ジェネレーター</h1>
-        </div>
-        
-        <div class="preset-buttons">
-            <div class="preset-section">
-                <div class="preset-label">左耳プリセット</div>
-                <button class="preset-btn left-preset" onclick="setPresetFrequency('left', 500)">
-                    <span class="preset-freq">500Hz</span>
-                    <span class="preset-desc">耳石器</span>
-                </button>
-                <button class="preset-btn left-preset" onclick="setPresetFrequency('left', 100)">
-                    <span class="preset-freq">100Hz</span>
-                    <span class="preset-desc">耳石器＋三半規管</span>
-                </button>
+    <!-- スプラッシュスクリーン -->
+    <div class="splash-screen" id="splashScreen">
+        <img src="https://raw.githubusercontent.com/[USERNAME]/[REPO]/main/FNT512.png" alt="FNT Logo" class="splash-logo" id="splashLogo">
+        <div class="splash-title">Functional Neuro Training</div>
+        <div class="splash-subtitle">バイノーラル周波数ジェネレーター</div>
+        <div class="splash-copyright">© 2024 Functional Neuro Training. All rights reserved.</div>
+    </div>
+
+    <!-- メインアプリ -->
+    <div class="app-container" id="appContainer" style="display: none;">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <div class="header-left">
+                <img src="https://raw.githubusercontent.com/[USERNAME]/[REPO]/main/FNT512-transparent.png" alt="FNT" class="fnt-logo" id="headerLogo">
+                <span class="app-title">バイノーラル周波数</span>
             </div>
-            <div class="preset-section">
-                <div class="preset-label">右耳プリセット</div>
-                <button class="preset-btn right-preset" onclick="setPresetFrequency('right', 500)">
-                    <span class="preset-freq">500Hz</span>
-                    <span class="preset-desc">耳石器</span>
-                </button>
-                <button class="preset-btn right-preset" onclick="setPresetFrequency('right', 100)">
-                    <span class="preset-freq">100Hz</span>
-                    <span class="preset-desc">耳石器＋三半規管</span>
-                </button>
-            </div>
-        </div>
-        
-        <div class="brainwave-section">
-            <div class="section-title">🧠 脳波プリセット（バイノーラルビート）</div>
-            <div class="brainwave-buttons">
-                <button class="brainwave-btn delta" onclick="setBrainwavePreset('delta')">
-                    <span class="wave-name">デルタ波</span>
-                    <span class="wave-freq">0.5-4Hz</span>
-                    <span class="wave-desc">深い睡眠・回復</span>
-                    <span class="wave-effect">熟睡、細胞再生、治癒促進</span>
-                </button>
-                <button class="brainwave-btn theta" onclick="setBrainwavePreset('theta')">
-                    <span class="wave-name">シータ波</span>
-                    <span class="wave-freq">4-8Hz</span>
-                    <span class="wave-desc">瞑想・創造性</span>
-                    <span class="wave-effect">深い瞑想、直感、記憶力向上</span>
-                </button>
-                <button class="brainwave-btn alpha" onclick="setBrainwavePreset('alpha')">
-                    <span class="wave-name">アルファ波</span>
-                    <span class="wave-freq">8-13Hz</span>
-                    <span class="wave-desc">リラックス・集中</span>
-                    <span class="wave-effect">ストレス軽減、学習効率向上</span>
-                </button>
-                <button class="brainwave-btn beta" onclick="setBrainwavePreset('beta')">
-                    <span class="wave-name">ベータ波</span>
-                    <span class="wave-freq">13-30Hz</span>
-                    <span class="wave-desc">覚醒・活動</span>
-                    <span class="wave-effect">集中力、問題解決、活発な思考</span>
-                </button>
-                <button class="brainwave-btn gamma" onclick="setBrainwavePreset('gamma')">
-                    <span class="wave-name">ガンマ波</span>
-                    <span class="wave-freq">30-50Hz</span>
-                    <span class="wave-desc">高次認知</span>
-                    <span class="wave-effect">意識の統合、悟り、高度な学習</span>
-                </button>
-            </div>
-            <div class="frequency-difference">
-                <span>現在の周波数差: </span>
-                <span id="freqDifference">8 Hz</span>
-                <span id="currentWaveType">(アルファ波)</span>
-            </div>
-        </div>
-        
-        <div class="ear-controls">
-            <div class="ear-section">
-                <div class="ear-label">
-                    <span class="ear-icon">👂</span>
-                    <span>左耳 (L)</span>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <div class="play-screen">
+                <!-- 3Dビジュアライザー -->
+                <div class="visualizer-container">
+                    <canvas id="spatial3DCanvas" width="250" height="250"></canvas>
                 </div>
-                <div class="freq-display" id="leftFreqDisplay">440 Hz</div>
-                <div class="slider-container">
-                    <input type="range" class="slider" id="leftFreq" min="20" max="20000" value="440" step="1">
-                </div>
-                <div class="octave-buttons">
-                    <button class="octave-btn" onclick="changeOctave('left', -1)">-1 Oct</button>
-                    <button class="octave-btn" onclick="changeOctave('left', 1)">+1 Oct</button>
-                </div>
-                <button class="mute-btn" id="leftMuteBtn" onclick="toggleMute('left')">🔊 ON</button>
-                <div class="volume-control">
-                    <label>音量: <span id="leftVolumeDisplay">70%</span></label>
-                    <input type="range" class="slider volume-slider-individual" id="leftVolumeSlider" min="0" max="100" value="70" step="1">
-                </div>
-            </div>
-            
-            <div class="ear-section">
-                <div class="ear-label">
-                    <span class="ear-icon">👂</span>
-                    <span>右耳 (R)</span>
-                </div>
-                <div class="freq-display" id="rightFreqDisplay">448 Hz</div>
-                <div class="slider-container">
-                    <input type="range" class="slider" id="rightFreq" min="20" max="20000" value="448" step="1">
-                </div>
-                <div class="octave-buttons">
-                    <button class="octave-btn" onclick="changeOctave('right', -1)">-1 Oct</button>
-                    <button class="octave-btn" onclick="changeOctave('right', 1)">+1 Oct</button>
-                </div>
-                <button class="mute-btn" id="rightMuteBtn" onclick="toggleMute('right')">🔊 ON</button>
-                <div class="volume-control">
-                    <label>音量: <span id="rightVolumeDisplay">70%</span></label>
-                    <input type="range" class="slider volume-slider-individual" id="rightVolumeSlider" min="0" max="100" value="70" step="1">
-                </div>
-            </div>
-        </div>
-        
-        <div class="volume-section">
-            <div class="ear-label">
-                <span>🔊 マスターボリューム</span>
-            </div>
-            <div class="volume-display" id="volumeDisplay">70%</div>
-            <div class="slider-container">
-                <input type="range" class="slider volume-slider" id="volumeSlider" min="0" max="100" value="70" step="1">
-            </div>
-            <div class="volume-indicators">
-                <span>🔇 0%</span>
-                <span>🔊 100%</span>
-            </div>
-        </div>
-        
-        <div class="bpm-section">
-            <div class="ear-label">
-                <span>🎵 BPM設定</span>
-            </div>
-            <div class="bpm-display" id="bpmDisplay">120 BPM</div>
-            <div class="slider-container">
-                <input type="range" class="slider" id="bpmSlider" min="30" max="300" value="120" step="1">
-            </div>
-            <div class="checkbox-container">
-                <input type="checkbox" id="randomBpm">
-                <label for="randomBpm">ランダムBPM (60-180)</label>
-            </div>
-        </div>
-        
-        <div class="spatial-audio-section">
-            <div class="section-title">🎭 3D音響効果</div>
-            <div class="spatial-controls">
-                <button class="spatial-btn" id="spatialBtn" onclick="toggleSpatialAudio()">
-                    <span>3D空間音響</span>
-                    <span class="spatial-status">OFF</span>
-                </button>
-                <div class="spatial-visualizer" id="spatialVisualizer">
-                    <div class="spatial-3d-container">
-                        <canvas id="spatial3DCanvas" width="230" height="230"></canvas>
+
+                <!-- 周波数表示 -->
+                <div class="frequency-display">
+                    <div class="freq-card">
+                        <div class="freq-label">左耳 (L)</div>
+                        <div class="freq-value" id="leftFreqDisplay">440 Hz</div>
+                    </div>
+                    <div class="freq-card">
+                        <div class="freq-label">右耳 (R)</div>
+                        <div class="freq-value" id="rightFreqDisplay">448 Hz</div>
                     </div>
                 </div>
+
+                <!-- 空間情報 -->
                 <div class="spatial-info">
                     <span>位置: </span>
                     <span id="spatialPosition">-</span>
                 </div>
-                <div class="spatial-mode-switch">
-                    <label class="mode-checkbox">
-                        <input type="checkbox" id="manualMode" onchange="toggleManualMode()">
-                        <span>手動モード</span>
-                    </label>
+
+                <!-- コントロールボタン -->
+                <div class="control-buttons">
+                    <button class="control-btn" id="playBtn" onclick="togglePlay()">▶ 再生</button>
+                    <button class="control-btn stop" id="stopBtn" onclick="stopSound()" style="display: none;">⏹ 停止</button>
                 </div>
-                <div class="height-slider-container" style="display: none;" id="heightControl">
-                    <div class="height-labels">
-                        <span>上</span>
-                        <span>中</span>
-                        <span>下</span>
+            </div>
+        </main>
+
+        <!-- フッター -->
+        <footer class="app-footer">
+            © 2024 Functional Neuro Training. All rights reserved.
+        </footer>
+    </div>
+
+    <!-- サイドメニュー -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    <nav class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <span class="menu-title">設定</span>
+            <button class="menu-close" onclick="closeMenu()">✕</button>
+        </div>
+        
+        <div class="menu-content">
+            <!-- 周波数調整 -->
+            <div class="menu-section">
+                <div class="section-title">🎚️ 周波数調整</div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>左耳</span>
+                        <span id="leftFreqLabel">440 Hz</span>
                     </div>
-                    <input type="range" class="height-slider" id="heightSlider" min="-1" max="1" value="0" step="0.1" orient="vertical">
+                    <input type="range" class="slider" id="leftFreq" min="20" max="20000" value="440" step="1">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>右耳</span>
+                        <span id="rightFreqLabel">448 Hz</span>
+                    </div>
+                    <input type="range" class="slider" id="rightFreq" min="20" max="20000" value="448" step="1">
+                </div>
+
+                <div class="preset-grid">
+                    <button class="preset-btn" onclick="setPresetFrequency('left', 100)">左耳 100Hz</button>
+                    <button class="preset-btn" onclick="setPresetFrequency('left', 500)">左耳 500Hz</button>
+                    <button class="preset-btn" onclick="setPresetFrequency('right', 100)">右耳 100Hz</button>
+                    <button class="preset-btn" onclick="setPresetFrequency('right', 500)">右耳 500Hz</button>
+                </div>
+            </div>
+
+            <!-- 脳波プリセット -->
+            <div class="menu-section">
+                <div class="section-title">🧠 脳波プリセット</div>
+                <div class="wave-buttons">
+                    <button class="wave-btn" onclick="setBrainwavePreset('delta')">デルタ波<br>0.5-4Hz</button>
+                    <button class="wave-btn" onclick="setBrainwavePreset('theta')">シータ波<br>4-8Hz</button>
+                    <button class="wave-btn" onclick="setBrainwavePreset('alpha')">アルファ波<br>8-13Hz</button>
+                    <button class="wave-btn" onclick="setBrainwavePreset('beta')">ベータ波<br>13-30Hz</button>
+                    <button class="wave-btn" onclick="setBrainwavePreset('gamma')">ガンマ波<br>30-50Hz</button>
+                </div>
+                <div style="margin-top: 15px; text-align: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                    <span>周波数差: </span>
+                    <span id="freqDifference" style="color: #FFD700; font-weight: bold;">8 Hz</span>
+                    <span id="currentWaveType" style="opacity: 0.8;">(アルファ波)</span>
+                </div>
+            </div>
+
+            <!-- 音量調整 -->
+            <div class="menu-section">
+                <div class="section-title">🔊 音量調整</div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>マスター音量</span>
+                        <span id="volumeLabel">70%</span>
+                    </div>
+                    <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70" step="1">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>左耳音量</span>
+                        <span id="leftVolumeLabel">70%</span>
+                    </div>
+                    <input type="range" class="slider" id="leftVolumeSlider" min="0" max="100" value="70" step="1">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>右耳音量</span>
+                        <span id="rightVolumeLabel">70%</span>
+                    </div>
+                    <input type="range" class="slider" id="rightVolumeSlider" min="0" max="100" value="70" step="1">
+                </div>
+            </div>
+
+            <!-- BPM設定 -->
+            <div class="menu-section">
+                <div class="section-title">🎵 BPM設定</div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>BPM</span>
+                        <span id="bpmLabel">120 BPM</span>
+                    </div>
+                    <input type="range" class="slider" id="bpmSlider" min="30" max="300" value="120" step="1">
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="randomBpm">
+                    <label for="randomBpm">ランダムBPM (60-180)</label>
+                </div>
+            </div>
+
+            <!-- 3D音響設定 -->
+            <div class="menu-section">
+                <div class="section-title">🎭 3D音響設定</div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="spatialAudio" onchange="toggleSpatialAudio()">
+                    <label for="spatialAudio">3D空間音響を有効化</label>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="manualMode" onchange="toggleManualMode()">
+                    <label for="manualMode">手動モード（ドラッグで操作）</label>
+                </div>
+                
+                <div class="slider-container" id="heightControl" style="display: none;">
+                    <div class="slider-label">
+                        <span>高さ</span>
+                        <span id="heightLabel">中</span>
+                    </div>
+                    <input type="range" class="slider" id="heightSlider" min="-1" max="1" value="0" step="0.1">
                 </div>
             </div>
         </div>
-        
-        <div class="control-buttons">
-            <button class="control-btn" id="playBtn" onclick="togglePlay()">▶ 再生</button>
-            <button class="control-btn stop" id="stopBtn" onclick="stopSound()" style="display: none;">⏹ 停止</button>
-        </div>
-        
-        <div class="status" id="status">停止中</div>
-    </div>
+    </nav>
 
     <script>
+        // グローバル変数
         let audioContext = null;
         let leftOscillator = null;
         let rightOscillator = null;
@@ -886,15 +678,91 @@
         let ctx = null;
         let lowpassFilter = null;
         let highpassFilter = null;
+        let githubRepo = 'hokutomiyazaki-arch/tone-generator'; // GitHubリポジトリ設定
 
-        // キャンバスの初期化
+        // 初期化
         window.addEventListener('DOMContentLoaded', function() {
+            // ロゴURLを設定
+            updateLogoUrls();
+            
+            // 全画面設定
+            setupFullscreen();
+            
+            // スプラッシュスクリーンの処理
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+                document.getElementById('appContainer').style.display = 'flex';
+                initializeApp();
+            }, 2000);
+        });
+
+        // GitHubリポジトリ確認（不要になったが互換性のため残す）
+        function checkGitHubRepo() {
+            // 固定値を使用
+            updateLogoUrls();
+        }
+
+        // ロゴURLの更新
+        function updateLogoUrls() {
+            const baseUrl = `https://raw.githubusercontent.com/${githubRepo}/main/`;
+            
+            // スプラッシュロゴ
+            const splashLogo = document.getElementById('splashLogo');
+            if (splashLogo) splashLogo.src = baseUrl + 'FNT512.png';
+            
+            // ヘッダーロゴ
+            const headerLogo = document.getElementById('headerLogo');
+            if (headerLogo) headerLogo.src = baseUrl + 'FNT512-transparent.png';
+            
+            // PWAアイコン更新
+            const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+            if (appleTouchIcon) appleTouchIcon.href = baseUrl + 'FNT512.png';
+        }
+
+        // 全画面設定
+        function setupFullscreen() {
+            // ページロード時に全画面化を試みる
+            document.addEventListener('click', enterFullscreenOnce);
+            document.addEventListener('touchstart', enterFullscreenOnce);
+            
+            // スクロール防止
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+            
+            // オーバースクロール防止
+            document.body.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+
+        // 一度だけ全画面化
+        function enterFullscreenOnce() {
+            enterFullscreen();
+            document.removeEventListener('click', enterFullscreenOnce);
+            document.removeEventListener('touchstart', enterFullscreenOnce);
+        }
+
+        // 全画面化
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // アプリ初期化
+        function initializeApp() {
             canvas = document.getElementById('spatial3DCanvas');
             ctx = canvas.getContext('2d');
-            updateFrequencyDifference();
-            draw3DSpace();
             
-            // マウス/タッチイベントの設定
+            // キャンバスイベント設定
             canvas.addEventListener('mousedown', startDrag);
             canvas.addEventListener('mousemove', drag);
             canvas.addEventListener('mouseup', endDrag);
@@ -902,7 +770,104 @@
             canvas.addEventListener('touchstart', startDrag);
             canvas.addEventListener('touchmove', drag);
             canvas.addEventListener('touchend', endDrag);
-        });
+            
+            // 初期描画
+            updateFrequencyDifference();
+            draw3DSpace();
+            setupEventListeners();
+        }
+
+        // メニュー制御
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            if (menu.classList.contains('open')) {
+                closeMenu();
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('visible');
+            }
+        }
+
+        function closeMenu() {
+            document.getElementById('sideMenu').classList.remove('open');
+            document.getElementById('menuOverlay').classList.remove('visible');
+        }
+
+        // イベントリスナー設定
+        function setupEventListeners() {
+            // 周波数スライダー
+            document.getElementById('leftFreq').addEventListener('input', function() {
+                const freq = this.value;
+                document.getElementById('leftFreqLabel').textContent = freq + ' Hz';
+                document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
+                updateFrequencyDifference();
+                if (leftOscillator) {
+                    leftOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                }
+            });
+
+            document.getElementById('rightFreq').addEventListener('input', function() {
+                const freq = this.value;
+                document.getElementById('rightFreqLabel').textContent = freq + ' Hz';
+                document.getElementById('rightFreqDisplay').textContent = freq + ' Hz';
+                updateFrequencyDifference();
+                if (rightOscillator) {
+                    rightOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                }
+            });
+
+            // 音量スライダー
+            document.getElementById('volumeSlider').addEventListener('input', function() {
+                masterVolume = this.value / 100;
+                document.getElementById('volumeLabel').textContent = this.value + '%';
+                if (isPlaying) updateVolume();
+            });
+
+            document.getElementById('leftVolumeSlider').addEventListener('input', function() {
+                leftVolume = this.value / 100;
+                document.getElementById('leftVolumeLabel').textContent = this.value + '%';
+                if (isPlaying && leftGain && !leftMuted) {
+                    leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
+                }
+            });
+
+            document.getElementById('rightVolumeSlider').addEventListener('input', function() {
+                rightVolume = this.value / 100;
+                document.getElementById('rightVolumeLabel').textContent = this.value + '%';
+                if (isPlaying && rightGain && !rightMuted) {
+                    rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
+                }
+            });
+
+            // BPMスライダー
+            document.getElementById('bpmSlider').addEventListener('input', function() {
+                const bpm = this.value;
+                document.getElementById('bpmLabel').textContent = bpm + ' BPM';
+                if (isPlaying) updateBPM(bpm);
+            });
+
+            // ランダムBPM
+            document.getElementById('randomBpm').addEventListener('change', function() {
+                if (this.checked && isPlaying) {
+                    startRandomBPM();
+                } else {
+                    stopRandomBPM();
+                }
+            });
+
+            // 高さスライダー
+            document.getElementById('heightSlider').addEventListener('input', function() {
+                currentSoundY = parseFloat(this.value);
+                const labels = ['下', '中', '上'];
+                const index = Math.round((parseFloat(this.value) + 1) * 1);
+                document.getElementById('heightLabel').textContent = labels[Math.min(2, Math.max(0, index))];
+                if (manualMode && spatialAudioActive) {
+                    setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+                }
+            });
+        }
 
         // 3D空間の描画
         function draw3DSpace() {
@@ -915,82 +880,76 @@
             ctx.lineWidth = 1;
             
             // 円形グリッド
-            for (let r = 20; r <= 100; r += 20) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for (let r = 25; r <= 100; r += 25) {
                 ctx.beginPath();
-                ctx.arc(115, 115, r, 0, Math.PI * 2);
+                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
                 ctx.stroke();
             }
             
             // 十字線
             ctx.beginPath();
-            ctx.moveTo(115, 15);
-            ctx.lineTo(115, 215);
-            ctx.moveTo(15, 115);
-            ctx.lineTo(215, 115);
+            ctx.moveTo(centerX, 20);
+            ctx.lineTo(centerX, canvas.height - 20);
+            ctx.moveTo(20, centerY);
+            ctx.lineTo(canvas.width - 20, centerY);
             ctx.stroke();
             
             // ラベル
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
             ctx.font = '12px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('前', 115, 12);
-            ctx.fillText('後', 115, 228);
-            ctx.fillText('左', 8, 118);
-            ctx.fillText('右', 222, 118);
+            ctx.fillText('前', centerX, 15);
+            ctx.fillText('後', centerX, canvas.height - 5);
+            ctx.fillText('左', 10, centerY + 4);
+            ctx.fillText('右', canvas.width - 10, centerY + 4);
             
-            // リスナー位置（中心）
+            // リスナー位置
             ctx.fillStyle = '#4CAF50';
             ctx.beginPath();
-            ctx.arc(115, 115, 8, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = 'white';
             ctx.font = 'bold 10px sans-serif';
-            ctx.fillText('YOU', 115, 119);
+            ctx.fillText('YOU', centerX, centerY + 4);
             
             // 音源の位置
             if (spatialAudioActive) {
-                const x = 115 + currentSoundX * 100;
-                const y = 115 - currentSoundZ * 100;
-                const size = 8 + Math.abs(currentSoundY) * 6; // 高さで大きさを変える
+                const x = centerX + currentSoundX * 100;
+                const y = centerY - currentSoundZ * 100;
+                const size = 8 + Math.abs(currentSoundY) * 6;
                 
-                // 位置による色の変化（より明確に）
+                // 位置による色
                 let hue, saturation, lightness;
-                
                 if (currentSoundY > 0.3) {
-                    // 上：オレンジ〜黄色（明るい）
                     hue = 30 + currentSoundY * 30;
                     saturation = 80;
                     lightness = 60 + currentSoundY * 10;
                 } else if (currentSoundY < -0.3) {
-                    // 下：青〜紫（深い）
                     hue = 220 - currentSoundY * 40;
                     saturation = 70;
                     lightness = 40 - currentSoundY * 10;
                 } else {
-                    // 中間：緑系
                     hue = 120;
                     saturation = 60;
                     lightness = 50;
                 }
                 
-                // 前後で明度も調整
-                if (currentSoundZ < 0) {
-                    lightness -= 15; // 後ろは暗く
-                } else {
-                    lightness += 10; // 前は明るく
-                }
+                if (currentSoundZ < 0) lightness -= 15;
+                else lightness += 10;
                 
                 ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
                 ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness - 20}%)`;
                 ctx.lineWidth = 3;
                 
-                // 音源マーカー
                 ctx.beginPath();
                 ctx.arc(x, y, size, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
                 
-                // パルスエフェクト（複数の波紋）
+                // パルスエフェクト
                 for (let i = 1; i <= 3; i++) {
                     ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${0.4 / i})`;
                     ctx.lineWidth = 2 / i;
@@ -998,45 +957,23 @@
                     ctx.arc(x, y, size + (i * 8), 0, Math.PI * 2);
                     ctx.stroke();
                 }
-                
-                // 高さインジケーター
-                if (Math.abs(currentSoundY) > 0.1) {
-                    ctx.save();
-                    ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.8)`;
-                    ctx.font = 'bold 10px sans-serif';
-                    ctx.textAlign = 'center';
-                    const heightText = currentSoundY > 0 ? '▲' : '▼';
-                    ctx.fillText(heightText, x, y - size - 5);
-                    ctx.restore();
-                }
             }
             
             requestAnimationFrame(draw3DSpace);
         }
 
-        // フルスクリーン設定
-        function enterFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
-        }
-
-        // 初期化
+        // Audio初期化
         function initAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
-        // プリセット周波数設定（左右別々）
+        // プリセット周波数設定
         function setPresetFrequency(ear, freq) {
             if (ear === 'left') {
                 document.getElementById('leftFreq').value = freq;
+                document.getElementById('leftFreqLabel').textContent = freq + ' Hz';
                 document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
                 
                 if (isPlaying && leftOscillator) {
@@ -1044,6 +981,7 @@
                 }
             } else if (ear === 'right') {
                 document.getElementById('rightFreq').value = freq;
+                document.getElementById('rightFreqLabel').textContent = freq + ' Hz';
                 document.getElementById('rightFreqDisplay').textContent = freq + ' Hz';
                 
                 if (isPlaying && rightOscillator) {
@@ -1054,64 +992,29 @@
             updateFrequencyDifference();
         }
 
-        // 脳波プリセット設定（左耳の現在値をベースに）
+        // 脳波プリセット設定
         function setBrainwavePreset(waveType) {
-            // 現在の左耳の周波数を基準にする
             const baseFreq = parseFloat(document.getElementById('leftFreq').value);
             let difference = 0;
             
             switch(waveType) {
-                case 'delta':
-                    difference = 2;  // 2Hz差（デルタ波）
-                    break;
-                case 'theta':
-                    difference = 6;  // 6Hz差（シータ波）
-                    break;
-                case 'alpha':
-                    difference = 10; // 10Hz差（アルファ波）
-                    break;
-                case 'beta':
-                    difference = 20; // 20Hz差（ベータ波）
-                    break;
-                case 'gamma':
-                    difference = 40; // 40Hz差（ガンマ波）
-                    break;
+                case 'delta': difference = 2; break;
+                case 'theta': difference = 6; break;
+                case 'alpha': difference = 10; break;
+                case 'beta': difference = 20; break;
+                case 'gamma': difference = 40; break;
             }
             
-            // 右耳の周波数を設定（左耳 + 差分）
-            const rightFreq = baseFreq + difference;
+            const rightFreq = Math.max(20, Math.min(20000, baseFreq + difference));
             
-            // 周波数範囲内に収める
-            const adjustedRightFreq = Math.max(20, Math.min(20000, rightFreq));
-            
-            document.getElementById('rightFreq').value = adjustedRightFreq;
-            document.getElementById('rightFreqDisplay').textContent = adjustedRightFreq + ' Hz';
+            document.getElementById('rightFreq').value = rightFreq;
+            document.getElementById('rightFreqLabel').textContent = rightFreq + ' Hz';
+            document.getElementById('rightFreqDisplay').textContent = rightFreq + ' Hz';
             
             updateFrequencyDifference();
             
-            if (isPlaying) {
-                if (rightOscillator) {
-                    rightOscillator.frequency.setValueAtTime(adjustedRightFreq, audioContext.currentTime);
-                }
-            }
-            
-            // ボタンのハイライト効果
-            document.querySelectorAll('.brainwave-btn').forEach(btn => {
-                btn.style.transform = 'scale(1)';
-                btn.style.opacity = '1';
-            });
-            event.target.closest('.brainwave-btn').style.transform = 'scale(1.05)';
-            event.target.closest('.brainwave-btn').style.opacity = '1';
-            
-            // フィードバックメッセージ（視覚的確認）
-            const status = document.getElementById('status');
-            const originalText = status.textContent;
-            status.textContent = `${waveType.charAt(0).toUpperCase() + waveType.slice(1)}波設定: ${baseFreq}Hz → ${adjustedRightFreq}Hz`;
-            
-            if (originalText === '再生中...') {
-                setTimeout(() => {
-                    status.textContent = originalText;
-                }, 2000);
+            if (isPlaying && rightOscillator) {
+                rightOscillator.frequency.setValueAtTime(rightFreq, audioContext.currentTime);
             }
         }
 
@@ -1124,148 +1027,24 @@
             document.getElementById('freqDifference').textContent = diff.toFixed(1) + ' Hz';
             
             let waveType = '';
-            if (diff >= 0.5 && diff < 4) {
-                waveType = '(デルタ波)';
-            } else if (diff >= 4 && diff < 8) {
-                waveType = '(シータ波)';
-            } else if (diff >= 8 && diff < 13) {
-                waveType = '(アルファ波)';
-            } else if (diff >= 13 && diff < 30) {
-                waveType = '(ベータ波)';
-            } else if (diff >= 30 && diff <= 50) {
-                waveType = '(ガンマ波)';
-            } else if (diff > 50) {
-                waveType = '(範囲外)';
-            } else {
-                waveType = '(モノラル)';
-            }
+            if (diff >= 0.5 && diff < 4) waveType = '(デルタ波)';
+            else if (diff >= 4 && diff < 8) waveType = '(シータ波)';
+            else if (diff >= 8 && diff < 13) waveType = '(アルファ波)';
+            else if (diff >= 13 && diff < 30) waveType = '(ベータ波)';
+            else if (diff >= 30 && diff <= 50) waveType = '(ガンマ波)';
+            else if (diff > 50) waveType = '(範囲外)';
+            else waveType = '(モノラル)';
             
             document.getElementById('currentWaveType').textContent = waveType;
         }
 
-        // 周波数表示の更新
-        document.getElementById('leftFreq').addEventListener('input', function() {
-            const freq = this.value;
-            document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
-            updateFrequencyDifference();
-            if (leftOscillator) {
-                leftOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-            }
-        });
-
-        document.getElementById('rightFreq').addEventListener('input', function() {
-            const freq = this.value;
-            document.getElementById('rightFreqDisplay').textContent = freq + ' Hz';
-            updateFrequencyDifference();
-            if (rightOscillator) {
-                rightOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-            }
-        });
-
-        // BPM表示の更新
-        document.getElementById('bpmSlider').addEventListener('input', function() {
-            const bpm = this.value;
-            document.getElementById('bpmDisplay').textContent = bpm + ' BPM';
-            if (isPlaying) {
-                updateBPM(bpm);
-            }
-        });
-
-        // 音量調整
-        document.getElementById('volumeSlider').addEventListener('input', function() {
-            masterVolume = this.value / 100;
-            document.getElementById('volumeDisplay').textContent = this.value + '%';
-            
-            if (isPlaying) {
-                updateVolume();
-            }
-        });
-
-        document.getElementById('leftVolumeSlider').addEventListener('input', function() {
-            leftVolume = this.value / 100;
-            document.getElementById('leftVolumeDisplay').textContent = this.value + '%';
-            
-            if (isPlaying && leftGain && !leftMuted) {
-                leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
-            }
-        });
-
-        document.getElementById('rightVolumeSlider').addEventListener('input', function() {
-            rightVolume = this.value / 100;
-            document.getElementById('rightVolumeDisplay').textContent = this.value + '%';
-            
-            if (isPlaying && rightGain && !rightMuted) {
-                rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
-            }
-        });
-
-        // ボリューム更新
+        // 音量更新
         function updateVolume() {
             if (leftGain && !leftMuted) {
                 leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
             }
             if (rightGain && !rightMuted) {
                 rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
-            }
-        }
-
-        // オクターブ変更
-        function changeOctave(ear, direction) {
-            const slider = ear === 'left' ? document.getElementById('leftFreq') : document.getElementById('rightFreq');
-            const display = ear === 'left' ? document.getElementById('leftFreqDisplay') : document.getElementById('rightFreqDisplay');
-            
-            let currentFreq = parseFloat(slider.value);
-            let newFreq;
-            
-            if (direction === 1) {
-                newFreq = currentFreq * 2;
-            } else {
-                newFreq = currentFreq / 2;
-            }
-            
-            newFreq = Math.max(20, Math.min(20000, newFreq));
-            
-            slider.value = newFreq;
-            display.textContent = Math.round(newFreq) + ' Hz';
-            
-            updateFrequencyDifference();
-            
-            if (isPlaying) {
-                if (ear === 'left' && leftOscillator) {
-                    leftOscillator.frequency.setValueAtTime(newFreq, audioContext.currentTime);
-                } else if (ear === 'right' && rightOscillator) {
-                    rightOscillator.frequency.setValueAtTime(newFreq, audioContext.currentTime);
-                }
-            }
-        }
-
-        // ミュート切り替え
-        function toggleMute(ear) {
-            const btn = ear === 'left' ? document.getElementById('leftMuteBtn') : document.getElementById('rightMuteBtn');
-            const gain = ear === 'left' ? leftGain : rightGain;
-            
-            if (ear === 'left') {
-                leftMuted = !leftMuted;
-                if (leftMuted) {
-                    btn.textContent = '🔇 OFF';
-                    btn.classList.add('muted');
-                    if (gain) gain.gain.value = 0;
-                } else {
-                    btn.textContent = '🔊 ON';
-                    btn.classList.remove('muted');
-                    if (gain) gain.gain.value = 0.3 * masterVolume * leftVolume;
-                }
-            } else {
-                rightMuted = !rightMuted;
-                if (rightMuted) {
-                    btn.textContent = '🔇 OFF';
-                    btn.classList.add('muted');
-                    if (gain) gain.gain.value = 0;
-                } else {
-                    btn.textContent = '🔊 ON';
-                    btn.classList.remove('muted');
-                    if (gain) gain.gain.value = 0.3 * masterVolume * rightVolume;
-                }
             }
         }
 
@@ -1299,19 +1078,11 @@
         }
 
         // ランダムBPM
-        document.getElementById('randomBpm').addEventListener('change', function() {
-            if (this.checked && isPlaying) {
-                startRandomBPM();
-            } else {
-                stopRandomBPM();
-            }
-        });
-
         function startRandomBPM() {
             randomBpmInterval = setInterval(() => {
                 const randomBpm = Math.floor(Math.random() * (180 - 60 + 1)) + 60;
                 document.getElementById('bpmSlider').value = randomBpm;
-                document.getElementById('bpmDisplay').textContent = randomBpm + ' BPM';
+                document.getElementById('bpmLabel').textContent = randomBpm + ' BPM';
                 updateBPM(randomBpm);
             }, 5000);
         }
@@ -1323,40 +1094,26 @@
             }
         }
 
-        // 3D音響効果のトグル
+        // 3D音響のトグル
         function toggleSpatialAudio() {
-            const btn = document.getElementById('spatialBtn');
-            const status = btn.querySelector('.spatial-status');
+            spatialAudioActive = document.getElementById('spatialAudio').checked;
             const heightControl = document.getElementById('heightControl');
             
-            if (!spatialAudioActive) {
-                spatialAudioActive = true;
-                btn.classList.add('active');
-                status.textContent = 'ON';
-                heightControl.style.display = 'flex';
-                
+            if (spatialAudioActive) {
+                heightControl.style.display = 'block';
                 if (isPlaying) {
                     stopSound();
-                    setTimeout(() => {
-                        startSound();
-                    }, 100);
+                    setTimeout(() => startSound(), 100);
                 }
             } else {
-                spatialAudioActive = false;
-                btn.classList.remove('active');
-                status.textContent = 'OFF';
                 heightControl.style.display = 'none';
-                
                 if (spatialInterval) {
                     clearInterval(spatialInterval);
                     spatialInterval = null;
                 }
-                
                 if (isPlaying) {
                     stopSound();
-                    setTimeout(() => {
-                        startSound();
-                    }, 100);
+                    setTimeout(() => startSound(), 100);
                 }
             }
         }
@@ -1380,14 +1137,6 @@
             }
         }
 
-        // 高さスライダーの処理
-        document.getElementById('heightSlider')?.addEventListener('input', function() {
-            currentSoundY = parseFloat(this.value);
-            if (manualMode && spatialAudioActive) {
-                setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
-            }
-        });
-
         // ドラッグ操作
         function startDrag(event) {
             if (!spatialAudioActive || !manualMode) return;
@@ -1403,18 +1152,18 @@
             
             let x, y;
             if (event.type.includes('touch')) {
-                x = ((event.touches[0].clientX - rect.left) / rect.width) * 230;
-                y = ((event.touches[0].clientY - rect.top) / rect.height) * 230;
+                x = ((event.touches[0].clientX - rect.left) / rect.width) * canvas.width;
+                y = ((event.touches[0].clientY - rect.top) / rect.height) * canvas.height;
             } else {
-                x = ((event.clientX - rect.left) / rect.width) * 230;
-                y = ((event.clientY - rect.top) / rect.height) * 230;
+                x = ((event.clientX - rect.left) / rect.width) * canvas.width;
+                y = ((event.clientY - rect.top) / rect.height) * canvas.height;
             }
             
-            // 中心を原点とした座標に変換
-            const dx = (x - 115) / 100;
-            const dz = -(y - 115) / 100;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const dx = (x - centerX) / 100;
+            const dz = -(y - centerY) / 100;
             
-            // 円内に制限
             const distance = Math.sqrt(dx * dx + dz * dz);
             if (distance <= 1) {
                 currentSoundX = dx;
@@ -1427,61 +1176,45 @@
             isDragging = false;
         }
 
-        // 音源位置を設定（PannerNodeを使用）
+        // 音源位置を設定
         function setSoundPosition(x, y, z) {
             if (!pannerNode || !isPlaying) return;
             
-            // PannerNodeの位置設定
             pannerNode.positionX.setValueAtTime(x * 2, audioContext.currentTime);
             pannerNode.positionY.setValueAtTime(y * 2, audioContext.currentTime);
             pannerNode.positionZ.setValueAtTime(z * 2, audioContext.currentTime);
             
-            // 前後と上下の効果を強化
             if (lowpassFilter && highpassFilter) {
-                // 前後の効果（前は明瞭、後ろは大幅にこもる）
                 let lowpassFreq = 20000;
                 let highpassFreq = 20;
                 
                 if (z < 0) {
-                    // 後方：低音を強調、高音をカット
-                    lowpassFreq = 2000 - (Math.abs(z) * 1500); // 500-2000Hz
+                    lowpassFreq = 2000 - (Math.abs(z) * 1500);
                     highpassFreq = 20;
                 } else {
-                    // 前方：高音を強調、明瞭に
-                    lowpassFreq = 15000 + (z * 5000); // 15000-20000Hz
-                    highpassFreq = 50 + (z * 50); // 50-100Hz
+                    lowpassFreq = 15000 + (z * 5000);
+                    highpassFreq = 50 + (z * 50);
                 }
                 
-                // 上下の効果（上は高音強調、下は低音強調）
                 if (y > 0) {
-                    // 上方：高音域を強調（きらびやか）
                     lowpassFreq = Math.min(20000, lowpassFreq + (y * 3000));
-                    highpassFreq = Math.max(20, highpassFreq + (y * 100)); // 高音を通す
+                    highpassFreq = Math.max(20, highpassFreq + (y * 100));
                 } else if (y < 0) {
-                    // 下方：低音域を強調（重厚）
-                    lowpassFreq = Math.max(1000, lowpassFreq + (y * 5000)); // より低くカット
-                    highpassFreq = Math.max(20, highpassFreq + (y * 30)); // 低音を保持
+                    lowpassFreq = Math.max(1000, lowpassFreq + (y * 5000));
+                    highpassFreq = Math.max(20, highpassFreq + (y * 30));
                 }
                 
                 lowpassFilter.frequency.setValueAtTime(lowpassFreq, audioContext.currentTime);
                 highpassFilter.frequency.setValueAtTime(highpassFreq, audioContext.currentTime);
                 
-                // Q値も調整して効果を強化
                 const qValue = Math.abs(z) * 2 + Math.abs(y) * 1.5 + 0.5;
                 lowpassFilter.Q.setValueAtTime(qValue, audioContext.currentTime);
                 
-                // 音量も位置によって調整
                 if (leftGain && rightGain) {
-                    // 前後による音量変化（後ろは小さく）
-                    const depthVolume = z < 0 ? (1 + z * 0.4) : 1; // 後方で最大40%減
-                    
-                    // 上下による音量変化（上は小さく、下は大きく）
-                    const heightVolume = y > 0 ? (1 - y * 0.3) : (1 - y * 0.2); // 上で30%減、下で20%増
-                    
-                    // 距離による減衰
+                    const depthVolume = z < 0 ? (1 + z * 0.4) : 1;
+                    const heightVolume = y > 0 ? (1 - y * 0.3) : (1 - y * 0.2);
                     const distance = Math.sqrt(x*x + y*y + z*z);
                     const distanceVolume = Math.max(0.3, 1 - distance * 0.5);
-                    
                     const finalVolume = 0.3 * masterVolume * depthVolume * heightVolume * distanceVolume;
                     
                     if (!leftMuted) {
@@ -1493,26 +1226,18 @@
                 }
             }
             
-            // リバーブ効果のシミュレーション（簡易版）
             if (pannerNode) {
-                // 後方や上方にある時は残響を増やす
-                const reverbAmount = (Math.abs(z) < 0 ? Math.abs(z) : 0) + (y > 0 ? y * 0.5 : 0);
-                
-                // コーンの設定で指向性を追加
                 if (z < 0) {
-                    // 後方：音が広がる
                     pannerNode.coneInnerAngle = 360;
                     pannerNode.coneOuterAngle = 360;
                     pannerNode.coneOuterGain = 0.8;
                 } else {
-                    // 前方：音が集中
                     pannerNode.coneInnerAngle = 180;
                     pannerNode.coneOuterAngle = 270;
                     pannerNode.coneOuterGain = 0.6;
                 }
             }
             
-            // 位置情報の更新
             updatePositionDisplay(x, y, z);
         }
 
@@ -1520,17 +1245,14 @@
         function updatePositionDisplay(x, y, z) {
             let position = '';
             
-            // 水平方向
             if (Math.abs(x) > 0.3) {
                 position += x > 0 ? '右' : '左';
             }
             
-            // 前後方向
             if (Math.abs(z) > 0.3) {
                 position += z > 0 ? '前' : '後';
             }
             
-            // 高さ
             let height = '';
             if (Math.abs(y) > 0.3) {
                 height = y > 0 ? '上' : '下';
@@ -1550,7 +1272,6 @@
         function updateSpatialPosition() {
             if (!spatialAudioActive || manualMode) return;
             
-            // ランダムな3D位置を生成
             const theta = Math.random() * Math.PI * 2;
             const phi = (Math.random() - 0.5) * Math.PI;
             const radius = 0.3 + Math.random() * 0.7;
@@ -1579,7 +1300,6 @@
             const rightFreq = parseFloat(document.getElementById('rightFreq').value);
             const bpm = parseFloat(document.getElementById('bpmSlider').value);
             
-            // オシレーターとゲインノード作成
             leftOscillator = audioContext.createOscillator();
             leftGain = audioContext.createGain();
             leftOscillator.frequency.value = leftFreq;
@@ -1594,9 +1314,7 @@
             
             merger = audioContext.createChannelMerger(2);
             
-            // 3D音響用の設定
             if (spatialAudioActive) {
-                // PannerNodeの作成と設定
                 pannerNode = audioContext.createPanner();
                 pannerNode.panningModel = 'HRTF';
                 pannerNode.distanceModel = 'inverse';
@@ -1607,7 +1325,6 @@
                 pannerNode.coneOuterAngle = 360;
                 pannerNode.coneOuterGain = 0;
                 
-                // リスナーの設定
                 if (audioContext.listener.forwardX) {
                     audioContext.listener.forwardX.setValueAtTime(0, audioContext.currentTime);
                     audioContext.listener.forwardY.setValueAtTime(0, audioContext.currentTime);
@@ -1617,7 +1334,6 @@
                     audioContext.listener.upZ.setValueAtTime(0, audioContext.currentTime);
                 }
                 
-                // フィルターの作成（前後と上下の効果用）
                 lowpassFilter = audioContext.createBiquadFilter();
                 lowpassFilter.type = 'lowpass';
                 lowpassFilter.frequency.value = 20000;
@@ -1628,7 +1344,6 @@
                 highpassFilter.frequency.value = 20;
                 highpassFilter.Q.value = 0.5;
                 
-                // 追加のフィルター（より豊かな効果のため）
                 const compressor = audioContext.createDynamicsCompressor();
                 compressor.threshold.value = -24;
                 compressor.knee.value = 30;
@@ -1636,7 +1351,6 @@
                 compressor.attack.value = 0.003;
                 compressor.release.value = 0.25;
                 
-                // 接続（3D音響経由）
                 leftOscillator.connect(leftGain);
                 leftGain.connect(merger, 0, 0);
                 
@@ -1649,7 +1363,6 @@
                 compressor.connect(pannerNode);
                 pannerNode.connect(audioContext.destination);
             } else {
-                // 通常の接続
                 leftOscillator.connect(leftGain);
                 leftGain.connect(merger, 0, 0);
                 
@@ -1659,7 +1372,6 @@
                 merger.connect(audioContext.destination);
             }
             
-            // 開始
             leftOscillator.start();
             rightOscillator.start();
             
@@ -1669,7 +1381,6 @@
                 startRandomBPM();
             }
             
-            // 3D音響が有効な場合
             if (spatialAudioActive) {
                 setTimeout(() => {
                     if (!manualMode) {
@@ -1686,7 +1397,6 @@
             isPlaying = true;
             document.getElementById('playBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'inline-block';
-            document.getElementById('status').textContent = '再生中...';
         }
 
         function stopSound() {
@@ -1721,7 +1431,6 @@
             isPlaying = false;
             document.getElementById('playBtn').style.display = 'inline-block';
             document.getElementById('stopBtn').style.display = 'none';
-            document.getElementById('status').textContent = '停止中';
         }
 
         // ページ離脱時の処理
@@ -1730,6 +1439,14 @@
                 stopSound();
             }
         });
+
+        // GitHubリポジトリ設定用（開発者用）
+        function setGitHubRepo(username, repo) {
+            githubRepo = `${username}/${repo}`;
+            localStorage.setItem('fnt_github_repo', githubRepo);
+            updateLogoUrls();
+            console.log('GitHub repository set to:', githubRepo);
+        }
     </script>
 </body>
 </html>
