@@ -1773,9 +1773,9 @@
                 pannerNode = audioContext.createPanner();
                 pannerNode.panningModel = 'HRTF';
                 pannerNode.distanceModel = 'inverse';
-                pannerNode.refDistance = 1;
-                pannerNode.maxDistance = 10;
-                pannerNode.rolloffFactor = 1;
+                pannerNode.refDistance = 0.5;
+                pannerNode.maxDistance = 15;
+                pannerNode.rolloffFactor = 2;
                 pannerNode.coneInnerAngle = 360;
                 pannerNode.coneOuterAngle = 360;
                 pannerNode.coneOuterGain = 0;
@@ -1792,12 +1792,12 @@
                 lowpassFilter = audioContext.createBiquadFilter();
                 lowpassFilter.type = 'lowpass';
                 lowpassFilter.frequency.value = 20000;
-                lowpassFilter.Q.value = 0.5;
+                lowpassFilter.Q.value = 1;
                 
                 highpassFilter = audioContext.createBiquadFilter();
                 highpassFilter.type = 'highpass';
                 highpassFilter.frequency.value = 20;
-                highpassFilter.Q.value = 0.5;
+                highpassFilter.Q.value = 0.7;
                 
                 const compressor = audioContext.createDynamicsCompressor();
                 compressor.threshold.value = -24;
