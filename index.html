@@ -784,6 +784,15 @@
                     </div>
                     <input type="range" class="slider" id="rightVolumeSlider" min="0" max="100" value="70" step="1">
                 </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="preset-btn" id="leftMuteBtn" onclick="toggleLeftMute()" style="flex: 1;">
+                        <span id="leftMuteText">Left ON</span>
+                    </button>
+                    <button class="preset-btn" id="rightMuteBtn" onclick="toggleRightMute()" style="flex: 1;">
+                        <span id="rightMuteText">Right ON</span>
+                    </button>
+                </div>
             </div>
 
             <!-- BPM設定 -->
@@ -1524,19 +1533,67 @@
                     
                     if (!leftMuted) {
                         leftGain.gain.cancelScheduledValues(now);
-                        leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, now);
+                        const currentLeftVolume = spatialAudioActive ? leftGain.gain.value : 0.3 * masterVolume * leftVolume;
+                        leftGain.gain.setValueAtTime(currentLeftVolume, now);
                         leftGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                        leftGain.gain.exponentialRampToValueAtTime(0.3 * masterVolume * leftVolume, now + 0.1);
+                        leftGain.gain.exponentialRampToValueAtTime(currentLeftVolume, now + 0.1);
                     }
                     
                     if (!rightMuted) {
                         rightGain.gain.cancelScheduledValues(now);
-                        rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, now);
+                        const currentRightVolume = spatialAudioActive ? rightGain.gain.value : 0.3 * masterVolume * rightVolume;
+                        rightGain.gain.setValueAtTime(currentRightVolume, now);
                         rightGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                        rightGain.gain.exponentialRampToValueAtTime(0.3 * masterVolume * rightVolume, now + 0.1);
+                        rightGain.gain.exponentialRampToValueAtTime(currentRightVolume, now + 0.1);
                     }
                 }
             }, interval);
+        }
+
+        // 左耳ミュートトグル
+        function toggleLeftMute() {
+            leftMuted = !leftMuted;
+            const btn = document.getElementById('leftMuteBtn');
+            const text = document.getElementById('leftMuteText');
+            
+            if (leftMuted) {
+                text.textContent = 'Left OFF';
+                btn.style.background = 'linear-gradient(135deg, #f093fb, #f5576c)';
+                btn.style.color = 'white';
+                if (leftGain) {
+                    leftGain.gain.setValueAtTime(0, audioContext.currentTime);
+                }
+            } else {
+                text.textContent = 'Left ON';
+                btn.style.background = 'white';
+                btn.style.color = '#333';
+                if (leftGain) {
+                    leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
+                }
+            }
+        }
+
+        // 右耳ミュートトグル
+        function toggleRightMute() {
+            rightMuted = !rightMuted;
+            const btn = document.getElementById('rightMuteBtn');
+            const text = document.getElementById('rightMuteText');
+            
+            if (rightMuted) {
+                text.textContent = 'Right OFF';
+                btn.style.background = 'linear-gradient(135deg, #f093fb, #f5576c)';
+                btn.style.color = 'white';
+                if (rightGain) {
+                    rightGain.gain.setValueAtTime(0, audioContext.currentTime);
+                }
+            } else {
+                text.textContent = 'Right ON';
+                btn.style.background = 'white';
+                btn.style.color = '#333';
+                if (rightGain) {
+                    rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
+                }
+            }
         }
 
         // ランダムBPM
@@ -1658,35 +1715,70 @@
         function setSoundPosition(x, y, z) {
             if (!pannerNode || !isPlaying) return;
             
-            pannerNode.positionX.setValueAtTime(x * 2, audioContext.currentTime);
-            pannerNode.positionY.setValueAtTime(y * 2, audioContext.currentTime);
-            pannerNode.positionZ.setValueAtTime(z * 2, audioContext.currentTime);
+            // より強調された3D位置設定
+            pannerNode.positionX.setValueAtTime(x * 3, audioContext.currentTime);
+            pannerNode.positionY.setValueAtTime(y * 3, audioContext.currentTime);
+            pannerNode.positionZ.setValueAtTime(z * 3, audioContext.currentTime);
+            
+            // パンナーの距離モデルをより強調
+            pannerNode.refDistance = 0.5;
+            pannerNode.maxDistance = 15;
+            pannerNode.rolloffFactor = 2;
             
             if (lowpassFilter && highpassFilter) {
                 let lowpassFreq = 20000;
                 let highpassFreq = 20;
                 
+                // 前後の位置による変化を強調
                 if (z < 0) {
-                    lowpassFreq = 2000 - (Math.abs(z) * 1500);
+                    // 後ろ：こもった音（低域強調）
+                    lowpassFreq = 1500 - (Math.abs(z) * 1000);
                     highpassFreq = 20;
                 } else {
-                    lowpassFreq = 15000 + (z * 5000);
-                    highpassFreq = 50 + (z * 50);
+                    // 前：クリアな音（高域も含む）
+                    lowpassFreq = 10000 + (z * 10000);
+                    highpassFreq = 100 + (z * 200);
                 }
                 
+                // 上下の位置による変化を強調
                 if (y > 0) {
-                    lowpassFreq = Math.min(20000, lowpassFreq + (y * 3000));
-                    highpassFreq = Math.max(20, highpassFreq + (y * 100));
+                    // 上：明るい音
+                    lowpassFreq = Math.min(20000, lowpassFreq + (y * 5000));
+                    highpassFreq = Math.max(20, highpassFreq + (y * 300));
                 } else if (y < 0) {
-                    lowpassFreq = Math.max(1000, lowpassFreq + (y * 5000));
-                    highpassFreq = Math.max(20, highpassFreq + (y * 30));
+                    // 下：暗い音
+                    lowpassFreq = Math.max(800, lowpassFreq + (y * 8000));
+                    highpassFreq = Math.max(20, highpassFreq - (Math.abs(y) * 50));
+                }
+                
+                // 左右の位置による音量差を追加（ミュート状態を考慮）
+                const stereoBalance = x; // -1 (左) to 1 (右)
+                if (leftGain && rightGain) {
+                    const leftAdjust = 1 - Math.max(0, stereoBalance * 0.5);
+                    const rightAdjust = 1 + Math.min(0, stereoBalance * 0.5);
+                    
+                    if (!leftMuted) {
+                        leftGain.gain.setValueAtTime(
+                            0.3 * masterVolume * leftVolume * leftAdjust, 
+                            audioContext.currentTime
+                        );
+                    }
+                    
+                    if (!rightMuted) {
+                        rightGain.gain.setValueAtTime(
+                            0.3 * masterVolume * rightVolume * rightAdjust, 
+                            audioContext.currentTime
+                        );
+                    }
                 }
                 
                 lowpassFilter.frequency.setValueAtTime(lowpassFreq, audioContext.currentTime);
                 highpassFilter.frequency.setValueAtTime(highpassFreq, audioContext.currentTime);
                 
-                const qValue = Math.abs(z) * 2 + Math.abs(y) * 1.5 + 0.5;
+                // Q値（共鳴）も位置に応じて変更
+                const qValue = 1 + Math.abs(z) * 3 + Math.abs(y) * 2;
                 lowpassFilter.Q.setValueAtTime(qValue, audioContext.currentTime);
+                highpassFilter.Q.setValueAtTime(qValue * 0.5, audioContext.currentTime);
             }
             
             updatePositionDisplay(x, y, z);
