@@ -336,6 +336,183 @@
             letter-spacing: 0.5px;
         }
 
+        .info-button {
+            position: absolute;
+            top: 12px;
+            right: 60px;
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            color: #333;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .info-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-modal.active {
+            display: flex;
+        }
+
+        .info-content {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .info-tabs {
+            display: flex;
+            gap: 15px;
+            background: #f5f5f5;
+            padding: 10px 20px;
+            flex-shrink: 0;
+        }
+
+        .info-tab {
+            padding: 8px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .info-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-body {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .info-body h3 {
+            color: #667eea;
+            margin: 20px 0 10px;
+            font-size: 1.2em;
+        }
+
+        .info-body h4 {
+            color: #333;
+            margin: 15px 0 8px;
+            font-size: 1em;
+        }
+
+        .info-body p {
+            color: #666;
+            margin: 10px 0;
+            font-size: 0.95em;
+        }
+
+        .info-body ul {
+            color: #666;
+            margin: 10px 0 10px 20px;
+            font-size: 0.95em;
+        }
+
+        .info-body li {
+            margin: 5px 0;
+        }
+
+        .info-close {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .usage-step {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .usage-step-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .science-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .frequency-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .frequency-table th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .frequency-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .frequency-table tr:hover {
+            background: #f5f5f5;
+        }
+
         .menu-close {
             width: 32px;
             height: 32px;
@@ -615,6 +792,7 @@
                 <img src="https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512-transparent.png" alt="FNT" class="fnt-logo" id="headerLogo">
                 <span class="app-title">Neuro Sound Generator</span>
             </div>
+            <button class="info-button" onclick="openInfoModal()">ℹ️</button>
             <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
         </header>
 
@@ -661,8 +839,169 @@
         </footer>
     </div>
 
-    <!-- サイドメニュー -->
-    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    <!-- 情報モーダル -->
+    <div class="info-modal" id="infoModal" onclick="closeInfoModalOnBackground(event)">
+        <div class="info-content" onclick="event.stopPropagation()">
+            <div class="info-header">
+                <span class="menu-title">Neuro Sound Generator - Guide</span>
+                <button class="info-close" onclick="closeInfoModal()">✕</button>
+            </div>
+            
+            <div class="info-tabs">
+                <button class="info-tab active" onclick="switchTab('usage')">使い方</button>
+                <button class="info-tab" onclick="switchTab('science')">神経科学</button>
+            </div>
+            
+            <div class="info-body">
+                <!-- 使い方タブ -->
+                <div id="usageTab" class="tab-content">
+                    <h3>🎧 基本的な使い方</h3>
+                    
+                    <div class="usage-step">
+                        <div class="usage-step-title">Step 1: ヘッドフォンの準備</div>
+                        <p>• 高品質なステレオヘッドフォンまたはイヤフォンを使用してください<br>
+                        • 骨伝導ヘッドフォンを使用すると前庭器官への刺激も可能です<br>
+                        • 音量は快適なレベルに調整してください（大音量は避けてください）</p>
+                    </div>
+                    
+                    <div class="usage-step">
+                        <div class="usage-step-title">Step 2: 目的に応じた設定</div>
+                        <p><strong>リラックス・瞑想：</strong>Alpha波（8-13Hz）またはTheta波（4-8Hz）<br>
+                        <strong>集中・作業：</strong>Beta波（13-30Hz）<br>
+                        <strong>深い休息：</strong>Delta波（0.5-4Hz）<br>
+                        <strong>創造性向上：</strong>Gamma波（30-50Hz）</p>
+                    </div>
+                    
+                    <div class="usage-step">
+                        <div class="usage-step-title">Step 3: アセスメント → 刺激 → 再評価</div>
+                        <p>1. <strong>刺激前：</strong>現在の状態を記録（集中力、気分、バランス感など）<br>
+                        2. <strong>刺激中：</strong>5-15分間継続して聴取<br>
+                        3. <strong>刺激後：</strong>変化を確認し、効果的な設定を記録</p>
+                    </div>
+                    
+                    <h3>⚙️ 各機能の詳細</h3>
+                    
+                    <h4>🎚️ 周波数コントロール</h4>
+                    <p>左右の耳に異なる周波数を設定できます。周波数の差がバイノーラルビートを生成し、特定の脳波を誘導します。</p>
+                    
+                    <h4>🎭 3D空間音響</h4>
+                    <p><strong>Smooth Movement：</strong>音源が滑らかに移動し、音源定位のトレーニングに<br>
+                    <strong>Manual Mode：</strong>画面をドラッグして音源位置を手動で制御<br>
+                    <strong>Movement Speed：</strong>音源の移動速度を調整</p>
+                    
+                    <h4>🎵 BPM設定</h4>
+                    <p>音量のパルスリズムを設定。リズミカルな刺激により、より効果的な神経同調を促進します。</p>
+                    
+                    <h4>🦴 骨伝導モード（100Hz/500Hz プリセット）</h4>
+                    <p>骨伝導ヘッドフォン使用時に前庭器官を刺激：<br>
+                    • <strong>100Hz：</strong>耳石器＋三半規管への刺激<br>
+                    • <strong>500Hz：</strong>主に耳石器への刺激</p>
+                    
+                    <h3>💡 効果的な使用のヒント</h3>
+                    <ul>
+                        <li>初めは短時間（5分程度）から開始し、徐々に時間を延ばす</li>
+                        <li>同じ時間帯に定期的に使用すると効果が安定しやすい</li>
+                        <li>目を閉じてリラックスした状態で使用すると効果的</li>
+                        <li>個人差があるため、自分に合った設定を見つけることが重要</li>
+                        <li>めまいや不快感を感じたらすぐに使用を中止</li>
+                    </ul>
+                </div>
+                
+                <!-- 神経科学タブ -->
+                <div id="scienceTab" class="tab-content" style="display: none;">
+                    <h3>🧠 神経科学的背景</h3>
+                    
+                    <div class="science-box">
+                        <h4>音源定位トレーニング（3D Spatial Audio）</h4>
+                        <p><strong>関連神経構造：</strong>下丘、上オリーブ複合体、聴覚野</p>
+                        <p>音源が3次元空間を移動することで以下が活性化されます：<br>
+                        • <strong>両耳間時間差（ITD）処理：</strong>音が左右の耳に到達する時間差を検出<br>
+                        • <strong>両耳間音圧差（ILD）処理：</strong>左右の音量差から水平面の定位を判断<br>
+                        • <strong>スペクトル手がかり処理：</strong>周波数特性の変化から垂直面・前後の定位を判断</p>
+                        <p>これらは脳幹の下丘で統合され、大脳皮質の聴覚野（A1野とベルト領域）で空間マップとして表現されます。</p>
+                    </div>
+                    
+                    <div class="science-box">
+                        <h4>周波数選択的刺激</h4>
+                        <p><strong>関連神経構造：</strong>蝸牛神経（CN VIII）、一次聴覚野のトノトピー配列</p>
+                        <p>• <strong>基底膜の場所理論：</strong>異なる周波数は蝸牛の異なる部位を刺激<br>
+                        • <strong>100Hz：</strong>蝸牛頂部を刺激、前庭器官にも振動が伝わりやすい<br>
+                        • <strong>500Hz：</strong>中間部を刺激、音声知覚に重要な帯域<br>
+                        • <strong>高周波数（1000Hz以上）：</strong>蝸牛基部を刺激、空間定位に重要</p>
+                    </div>
+                    
+                    <h3>🌊 バイノーラルビート効果</h3>
+                    <p>左右の耳に異なる周波数を提示すると、脳は両周波数の差分を知覚し、その周波数で神経活動が同調します。</p>
+                    
+                    <table class="frequency-table">
+                        <thead>
+                            <tr>
+                                <th>脳波</th>
+                                <th>周波数差</th>
+                                <th>効果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Delta波</strong></td>
+                                <td>0.5-4Hz</td>
+                                <td>深睡眠、細胞修復、成長ホルモン分泌</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Theta波</strong></td>
+                                <td>4-8Hz</td>
+                                <td>REM睡眠、記憶の固定、創造性</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alpha波</strong></td>
+                                <td>8-13Hz</td>
+                                <td>リラックス、デフォルトモードネットワーク</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Beta波</strong></td>
+                                <td>13-30Hz</td>
+                                <td>集中、実行機能、ワーキングメモリ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Gamma波</strong></td>
+                                <td>30-50Hz</td>
+                                <td>意識の統合、高次認知機能</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="science-box">
+                        <h4>骨伝導による前庭刺激</h4>
+                        <p><strong>耳石器刺激（100-500Hz）：</strong><br>
+                        • 卵形嚢と球形嚢の有毛細胞を振動刺激<br>
+                        • 重力感覚と直線加速度の知覚を活性化</p>
+                        
+                        <p><strong>三半規管への影響（100Hz付近）：</strong><br>
+                        • 回転感覚の処理系を刺激<br>
+                        • 前庭-眼反射（VOR）の調整</p>
+                        
+                        <p><strong>前庭-自律神経系の連携：</strong><br>
+                        • 交感神経/副交感神経バランスの調整<br>
+                        • 覚醒レベルの最適化</p>
+                    </div>
+                    
+                    <h3>⚡ 統合的神経刺激</h3>
+                    <p>これらの要素を組み合わせることで、個人に最適化された神経刺激プロトコルを作成できます：</p>
+                    <ul>
+                        <li><strong>聴覚-前庭統合：</strong>空間認知とバランス機能の向上</li>
+                        <li><strong>脳波-認知機能連携：</strong>タスクに応じた最適な脳状態の誘導</li>
+                        <li><strong>神経可塑性の促進：</strong>新しい神経回路の形成と既存回路の強化</li>
+                    </ul>
+                    
+                    <h3>🔬 神経科学的原理</h3>
+                    <p>• <strong>ヘブ則：</strong>同時に発火するニューロン間の結合が強化される<br>
+                    • <strong>周波数追随反応（FFR）：</strong>聴覚系が外部リズムに同調する現象<br>
+                    • <strong>クロスモーダル可塑性：</strong>異なる感覚系の相互作用による学習促進<br>
+                    • <strong>ホメオスタシス可塑性：</strong>神経系の適応的な調整メカニズム</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <nav class="side-menu" id="sideMenu">
         <div class="menu-header">
             <span class="menu-title">Settings</span>
@@ -1990,6 +2329,40 @@
             isPlaying = false;
             document.getElementById('playBtn').style.display = 'inline-block';
             document.getElementById('stopBtn').style.display = 'none';
+        }
+
+        // 情報モーダル関連
+        function openInfoModal() {
+            document.getElementById('infoModal').classList.add('active');
+        }
+        
+        function closeInfoModal() {
+            document.getElementById('infoModal').classList.remove('active');
+        }
+        
+        function closeInfoModalOnBackground(event) {
+            if (event.target === document.getElementById('infoModal')) {
+                closeInfoModal();
+            }
+        }
+        
+        function switchTab(tabName) {
+            // すべてのタブボタンをリセット
+            const tabs = document.querySelectorAll('.info-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // すべてのタブコンテンツを非表示
+            document.getElementById('usageTab').style.display = 'none';
+            document.getElementById('scienceTab').style.display = 'none';
+            
+            // 選択されたタブをアクティブに
+            if (tabName === 'usage') {
+                tabs[0].classList.add('active');
+                document.getElementById('usageTab').style.display = 'block';
+            } else if (tabName === 'science') {
+                tabs[1].classList.add('active');
+                document.getElementById('scienceTab').style.display = 'block';
+            }
         }
 
         // ページ離脱時
