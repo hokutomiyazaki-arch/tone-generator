@@ -369,6 +369,7 @@
             z-index: 2000;
             align-items: center;
             justify-content: center;
+            -webkit-overflow-scrolling: touch;
         }
 
         .info-modal.active {
@@ -379,13 +380,12 @@
             background: white;
             width: 90%;
             max-width: 800px;
-            height: 85vh;
-            max-height: 85vh;
+            height: 85%;
             border-radius: 20px;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             position: relative;
+            overflow: hidden;
         }
 
         .info-header {
@@ -396,6 +396,8 @@
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            position: relative;
+            z-index: 10;
         }
 
         .info-tabs {
@@ -404,6 +406,8 @@
             background: #f5f5f5;
             padding: 10px 20px;
             flex-shrink: 0;
+            position: relative;
+            z-index: 10;
         }
 
         .info-tab {
@@ -426,11 +430,16 @@
         .info-body {
             flex: 1;
             padding: 25px;
-            overflow-y: auto;
+            overflow-y: scroll;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
             line-height: 1.8;
-            min-height: 0;
+            position: relative;
+            height: calc(100% - 120px);
+        }
+
+        .tab-content {
+            position: relative;
+            padding-bottom: 30px;
         }
 
         .info-body h3 {
@@ -733,27 +742,25 @@
             border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        @media (max-width: 480px) {
-            .app-header {
-                padding: 10px 15px;
+        @media (max-width: 768px) {
+            .info-content {
+                width: 95%;
+                height: 90%;
+                margin: 5% auto;
             }
             
-            .app-title {
-                font-size: 1em;
+            .info-body {
+                padding: 20px;
+                height: calc(100% - 110px);
             }
             
-            .frequency-display {
-                padding: 12px 20px;
-                gap: 15px;
+            .frequency-table {
+                font-size: 0.8em;
             }
             
-            .freq-value {
-                font-size: 1.4em;
-            }
-            
-            .control-btn {
-                padding: 12px 30px;
-                font-size: 0.95em;
+            .frequency-table th,
+            .frequency-table td {
+                padding: 8px 5px;
             }
         }
         
