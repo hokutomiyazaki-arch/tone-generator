@@ -379,11 +379,13 @@
             background: white;
             width: 90%;
             max-width: 800px;
+            height: 85vh;
             max-height: 85vh;
             border-radius: 20px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .info-header {
@@ -425,7 +427,10 @@
             flex: 1;
             padding: 25px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
             line-height: 1.8;
+            min-height: 0;
         }
 
         .info-body h3 {
@@ -1776,6 +1781,16 @@
         function initAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // iOS対策: サスペンド状態を解除
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+            
+            // iOS Safari対策: ユーザー操作後にコンテキストを再開
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
             }
         }
 
@@ -2180,114 +2195,138 @@
 
         function startSound() {
             initAudio();
-            enterFullscreen();
             
-            const leftFreq = parseFloat(document.getElementById('leftFreq').value);
-            const rightFreq = parseFloat(document.getElementById('rightFreq').value);
-            const bpm = parseFloat(document.getElementById('bpmSlider').value);
-            
-            leftOscillator = audioContext.createOscillator();
-            leftGain = audioContext.createGain();
-            leftOscillator.frequency.value = leftFreq;
-            leftOscillator.type = 'sine';
-            leftGain.gain.value = leftMuted ? 0 : 0.3 * masterVolume * leftVolume;
-            
-            rightOscillator = audioContext.createOscillator();
-            rightGain = audioContext.createGain();
-            rightOscillator.frequency.value = rightFreq;
-            rightOscillator.type = 'sine';
-            rightGain.gain.value = rightMuted ? 0 : 0.3 * masterVolume * rightVolume;
-            
-            merger = audioContext.createChannelMerger(2);
-            
-            if (spatialAudioActive) {
-                pannerNode = audioContext.createPanner();
-                pannerNode.panningModel = 'HRTF';
-                pannerNode.distanceModel = 'inverse';
-                pannerNode.refDistance = 0.5;
-                pannerNode.maxDistance = 15;
-                pannerNode.rolloffFactor = 2;
-                pannerNode.coneInnerAngle = 360;
-                pannerNode.coneOuterAngle = 360;
-                pannerNode.coneOuterGain = 0;
-                
-                if (audioContext.listener.forwardX) {
-                    audioContext.listener.forwardX.setValueAtTime(0, audioContext.currentTime);
-                    audioContext.listener.forwardY.setValueAtTime(0, audioContext.currentTime);
-                    audioContext.listener.forwardZ.setValueAtTime(-1, audioContext.currentTime);
-                    audioContext.listener.upX.setValueAtTime(0, audioContext.currentTime);
-                    audioContext.listener.upY.setValueAtTime(1, audioContext.currentTime);
-                    audioContext.listener.upZ.setValueAtTime(0, audioContext.currentTime);
+            // iOS対策: AudioContextが確実に動作するまで待機
+            const startAudioContext = () => {
+                if (audioContext.state === 'suspended') {
+                    return audioContext.resume();
                 }
-                
-                lowpassFilter = audioContext.createBiquadFilter();
-                lowpassFilter.type = 'lowpass';
-                lowpassFilter.frequency.value = 20000;
-                lowpassFilter.Q.value = 1;
-                
-                highpassFilter = audioContext.createBiquadFilter();
-                highpassFilter.type = 'highpass';
-                highpassFilter.frequency.value = 20;
-                highpassFilter.Q.value = 0.7;
-                
-                const compressor = audioContext.createDynamicsCompressor();
-                compressor.threshold.value = -24;
-                compressor.knee.value = 30;
-                compressor.ratio.value = 12;
-                compressor.attack.value = 0.003;
-                compressor.release.value = 0.25;
-                
-                leftOscillator.connect(leftGain);
-                leftGain.connect(merger, 0, 0);
-                
-                rightOscillator.connect(rightGain);
-                rightGain.connect(merger, 0, 1);
-                
-                merger.connect(lowpassFilter);
-                lowpassFilter.connect(highpassFilter);
-                highpassFilter.connect(compressor);
-                compressor.connect(pannerNode);
-                pannerNode.connect(audioContext.destination);
-            } else {
-                leftOscillator.connect(leftGain);
-                leftGain.connect(merger, 0, 0);
-                
-                rightOscillator.connect(rightGain);
-                rightGain.connect(merger, 0, 1);
-                
-                merger.connect(audioContext.destination);
-            }
+                return Promise.resolve();
+            };
             
-            leftOscillator.start();
-            rightOscillator.start();
-            
-            updateBPM(bpm);
-            
-            if (document.getElementById('randomBpm').checked) {
-                startRandomBPM();
-            }
-            
-            if (spatialAudioActive) {
+            startAudioContext().then(() => {
+                enterFullscreen();
+                
+                const leftFreq = parseFloat(document.getElementById('leftFreq').value);
+                const rightFreq = parseFloat(document.getElementById('rightFreq').value);
+                const bpm = parseFloat(document.getElementById('bpmSlider').value);
+                
+                // iOS対策: ダミーの音を一瞬再生してオーディオコンテキストを確実に開始
+                const dummy = audioContext.createOscillator();
+                const dummyGain = audioContext.createGain();
+                dummy.connect(dummyGain);
+                dummyGain.connect(audioContext.destination);
+                dummyGain.gain.value = 0.001;
+                dummy.start();
+                dummy.stop(audioContext.currentTime + 0.01);
+                
                 setTimeout(() => {
-                    if (!manualMode) {
-                        if (smoothMovement) {
-                            generateNewPath();
-                            startSmoothMovement();
-                        } else {
-                            updateSpatialPosition();
-                            spatialInterval = setInterval(() => {
-                                updateSpatialPosition();
-                            }, 2000);
+                    leftOscillator = audioContext.createOscillator();
+                    leftGain = audioContext.createGain();
+                    leftOscillator.frequency.value = leftFreq;
+                    leftOscillator.type = 'sine';
+                    leftGain.gain.value = leftMuted ? 0 : 0.3 * masterVolume * leftVolume;
+                    
+                    rightOscillator = audioContext.createOscillator();
+                    rightGain = audioContext.createGain();
+                    rightOscillator.frequency.value = rightFreq;
+                    rightOscillator.type = 'sine';
+                    rightGain.gain.value = rightMuted ? 0 : 0.3 * masterVolume * rightVolume;
+                    
+                    merger = audioContext.createChannelMerger(2);
+                    
+                    if (spatialAudioActive) {
+                        pannerNode = audioContext.createPanner();
+                        pannerNode.panningModel = 'HRTF';
+                        pannerNode.distanceModel = 'inverse';
+                        pannerNode.refDistance = 0.5;
+                        pannerNode.maxDistance = 15;
+                        pannerNode.rolloffFactor = 2;
+                        pannerNode.coneInnerAngle = 360;
+                        pannerNode.coneOuterAngle = 360;
+                        pannerNode.coneOuterGain = 0;
+                        
+                        if (audioContext.listener.forwardX) {
+                            audioContext.listener.forwardX.setValueAtTime(0, audioContext.currentTime);
+                            audioContext.listener.forwardY.setValueAtTime(0, audioContext.currentTime);
+                            audioContext.listener.forwardZ.setValueAtTime(-1, audioContext.currentTime);
+                            audioContext.listener.upX.setValueAtTime(0, audioContext.currentTime);
+                            audioContext.listener.upY.setValueAtTime(1, audioContext.currentTime);
+                            audioContext.listener.upZ.setValueAtTime(0, audioContext.currentTime);
                         }
+                        
+                        lowpassFilter = audioContext.createBiquadFilter();
+                        lowpassFilter.type = 'lowpass';
+                        lowpassFilter.frequency.value = 20000;
+                        lowpassFilter.Q.value = 1;
+                        
+                        highpassFilter = audioContext.createBiquadFilter();
+                        highpassFilter.type = 'highpass';
+                        highpassFilter.frequency.value = 20;
+                        highpassFilter.Q.value = 0.7;
+                        
+                        const compressor = audioContext.createDynamicsCompressor();
+                        compressor.threshold.value = -24;
+                        compressor.knee.value = 30;
+                        compressor.ratio.value = 12;
+                        compressor.attack.value = 0.003;
+                        compressor.release.value = 0.25;
+                        
+                        leftOscillator.connect(leftGain);
+                        leftGain.connect(merger, 0, 0);
+                        
+                        rightOscillator.connect(rightGain);
+                        rightGain.connect(merger, 0, 1);
+                        
+                        merger.connect(lowpassFilter);
+                        lowpassFilter.connect(highpassFilter);
+                        highpassFilter.connect(compressor);
+                        compressor.connect(pannerNode);
+                        pannerNode.connect(audioContext.destination);
                     } else {
-                        setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+                        leftOscillator.connect(leftGain);
+                        leftGain.connect(merger, 0, 0);
+                        
+                        rightOscillator.connect(rightGain);
+                        rightGain.connect(merger, 0, 1);
+                        
+                        merger.connect(audioContext.destination);
                     }
-                }, 100);
-            }
-            
-            isPlaying = true;
-            document.getElementById('playBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'inline-block';
+                    
+                    leftOscillator.start();
+                    rightOscillator.start();
+                    
+                    updateBPM(bpm);
+                    
+                    if (document.getElementById('randomBpm').checked) {
+                        startRandomBPM();
+                    }
+                    
+                    if (spatialAudioActive) {
+                        setTimeout(() => {
+                            if (!manualMode) {
+                                if (smoothMovement) {
+                                    generateNewPath();
+                                    startSmoothMovement();
+                                } else {
+                                    updateSpatialPosition();
+                                    spatialInterval = setInterval(() => {
+                                        updateSpatialPosition();
+                                    }, 2000);
+                                }
+                            } else {
+                                setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+                            }
+                        }, 100);
+                    }
+                    
+                    isPlaying = true;
+                    document.getElementById('playBtn').style.display = 'none';
+                    document.getElementById('stopBtn').style.display = 'inline-block';
+                }, 50);
+            }).catch(err => {
+                console.error('AudioContext start error:', err);
+            });
         }
 
         function stopSound() {
