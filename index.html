@@ -9,7 +9,6 @@
     <meta name="theme-color" content="#ffffff">
     <title>Neuro Sound Generator - FNT</title>
     
-    <!-- PWA対応 -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512.png">
     
@@ -33,7 +32,6 @@
             left: 0;
         }
 
-        /* CSS変数でビューポート高さを管理 */
         :root {
             --vh: 1vh;
         }
@@ -173,6 +171,28 @@
             background: rgba(0, 0, 0, 0.05);
         }
 
+        .info-button {
+            position: absolute;
+            top: 12px;
+            right: 60px;
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            color: #333;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .info-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
         .main-content {
             flex: 1;
             display: flex;
@@ -249,6 +269,14 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .freq-extra {
+            font-size: 0.7em;
+            color: #f5576c;
+            margin-top: 2px;
+            font-weight: 600;
+            min-height: 14px;
         }
 
         .spatial-info {
@@ -338,28 +366,6 @@
             font-size: 1.2em;
             font-weight: 400;
             letter-spacing: 0.5px;
-        }
-
-        .info-button {
-            position: absolute;
-            top: 12px;
-            right: 60px;
-            width: 36px;
-            height: 36px;
-            background: transparent;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            color: #333;
-            font-size: 1.1em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .info-button:hover {
-            background: rgba(0, 0, 0, 0.05);
         }
 
         .info-panel {
@@ -455,10 +461,6 @@
             padding: 10px;
             border-bottom: 1px solid #eee;
             font-size: 0.9em;
-        }
-
-        .frequency-table tr:hover {
-            background: #f5f5f5;
         }
 
         .menu-close {
@@ -571,6 +573,18 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
+        /* トグルでアクティブな追加トーンボタン */
+        .preset-btn.tone-active {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .preset-btn.tone-active .preset-desc {
+            opacity: 0.9;
+        }
+
         .preset-btn .preset-freq {
             font-weight: 600;
             display: block;
@@ -580,6 +594,14 @@
         .preset-btn .preset-desc {
             font-size: 0.75em;
             opacity: 0.7;
+        }
+
+        .tone-hint {
+            font-size: 0.75em;
+            color: #999;
+            margin-top: 10px;
+            text-align: center;
+            line-height: 1.5;
         }
 
         .wave-buttons {
@@ -676,28 +698,30 @@
             border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        @media (max-width: 768px) {
-            .info-content {
-                width: 95%;
-                height: 90%;
-                margin: 5% auto;
-            }
-            
-            .info-body {
-                padding: 20px;
-                height: calc(100% - 110px);
-            }
-            
-            .frequency-table {
-                font-size: 0.8em;
-            }
-            
-            .frequency-table th,
-            .frequency-table td {
-                padding: 8px 5px;
-            }
+        /* トースト通知 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 500;
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+            opacity: 0;
+            transition: all 0.4s ease-out;
+            z-index: 10001;
+            pointer-events: none;
         }
-        
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
         @media (max-height: 700px) {
             .frequency-display {
                 margin-top: 10px;
@@ -732,7 +756,6 @@
 
     <!-- メインアプリ -->
     <div class="app-container" id="appContainer" style="display: none;">
-        <!-- ヘッダー -->
         <header class="app-header">
             <div class="header-content">
                 <img src="https://raw.githubusercontent.com/hokutomiyazaki-arch/tone-generator/main/FNT512-transparent.png" alt="FNT" class="fnt-logo" id="headerLogo">
@@ -742,35 +765,31 @@
             <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
         </header>
 
-        <!-- メインコンテンツ -->
         <main class="main-content">
             <div class="play-screen">
-                <!-- 全画面3Dビジュアライザー -->
                 <div class="visualizer-full">
                     <canvas id="spatial3DCanvas"></canvas>
                 </div>
 
-                <!-- コントロールパネル -->
                 <div class="control-panel">
-                    <!-- 周波数表示（上部） -->
                     <div class="frequency-display">
                         <div class="freq-card">
                             <div class="freq-label">Left</div>
                             <div class="freq-value" id="leftFreqDisplay">440 Hz</div>
+                            <div class="freq-extra" id="leftExtraDisplay"></div>
                         </div>
                         <div class="freq-card">
                             <div class="freq-label">Right</div>
                             <div class="freq-value" id="rightFreqDisplay">448 Hz</div>
+                            <div class="freq-extra" id="rightExtraDisplay"></div>
                         </div>
                     </div>
 
-                    <!-- 空間情報（下部外側） -->
                     <div class="spatial-info">
                         <span>Position: </span>
                         <span id="spatialPosition">Center</span>
                     </div>
 
-                    <!-- コントロールボタン（下部） -->
                     <div class="control-buttons">
                         <button class="control-btn" id="playBtn" onclick="togglePlay()">▶ PLAY</button>
                         <button class="control-btn stop" id="stopBtn" onclick="stopSound()" style="display: none;">⏹ STOP</button>
@@ -779,13 +798,12 @@
             </div>
         </main>
 
-        <!-- フッター -->
         <footer class="app-footer">
             © 2024 Functional Neuro Training. All rights reserved.
         </footer>
     </div>
 
-    <!-- 情報パネル（サイドメニューと同じ実装） -->
+    <!-- 情報パネル -->
     <div class="menu-overlay" id="infoOverlay" onclick="closeInfoModal()"></div>
     <nav class="side-menu info-panel" id="infoPanel">
         <div class="menu-header">
@@ -799,7 +817,6 @@
         </div>
         
         <div class="menu-content">
-            <!-- 使い方タブ -->
             <div id="usageTab" class="tab-content">
                 <h3 style="color: #667eea; margin: 20px 0 10px; font-size: 1.2em;">🎧 基本的な使い方</h3>
                 
@@ -830,6 +847,9 @@
                 <h4 style="color: #333; margin: 15px 0 8px; font-size: 1em;">🎚️ 周波数コントロール</h4>
                 <p>左右の耳に異なる周波数を設定できます。周波数の差がバイノーラルビートを生成し、特定の脳波を誘導します。</p>
                 
+                <h4 style="color: #333; margin: 15px 0 8px; font-size: 1em;">🔀 同時出力（複数トーン）</h4>
+                <p>100Hz/500Hzのボタンを押すと、メイン周波数に重ねて同時に鳴らせます。もう一度押すと解除されます。各耳で独立して設定可能です。</p>
+                
                 <h4 style="color: #333; margin: 15px 0 8px; font-size: 1em;">🎭 3D空間音響</h4>
                 <p><strong>Smooth Movement：</strong>音源が滑らかに移動し、音源定位のトレーニングに<br>
                 <strong>Manual Mode：</strong>画面をドラッグして音源位置を手動で制御<br>
@@ -853,7 +873,6 @@
                 </ul>
             </div>
             
-            <!-- 神経科学タブ -->
             <div id="scienceTab" class="tab-content" style="display: none;">
                 <h3 style="color: #667eea; margin: 20px 0 10px; font-size: 1.2em;">🧠 神経科学的背景</h3>
                 
@@ -864,7 +883,7 @@
                     • <strong>両耳間時間差（ITD）処理：</strong>音が左右の耳に到達する時間差を検出<br>
                     • <strong>両耳間音圧差（ILD）処理：</strong>左右の音量差から水平面の定位を判断<br>
                     • <strong>スペクトル手がかり処理：</strong>周波数特性の変化から垂直面・前後の定位を判断</p>
-                    <p>これらは脳幹の下丘で統合され、大脳皮質の聴覚野（A1野とベルト領域）で空間マップとして表現されます。</p>
+                    <p>これらは脳幹の下丘で統合され、大脳皮質の聴覚野で空間マップとして表現されます。</p>
                 </div>
                 
                 <div class="science-box">
@@ -888,31 +907,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>Delta波</strong></td>
-                            <td>0.5-4Hz</td>
-                            <td>深睡眠、細胞修復、成長ホルモン分泌</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Theta波</strong></td>
-                            <td>4-8Hz</td>
-                            <td>REM睡眠、記憶の固定、創造性</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Alpha波</strong></td>
-                            <td>8-13Hz</td>
-                            <td>リラックス、デフォルトモードネットワーク</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Beta波</strong></td>
-                            <td>13-30Hz</td>
-                            <td>集中、実行機能、ワーキングメモリ</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Gamma波</strong></td>
-                            <td>30-50Hz</td>
-                            <td>意識の統合、高次認知機能</td>
-                        </tr>
+                        <tr><td><strong>Delta波</strong></td><td>0.5-4Hz</td><td>深睡眠、細胞修復、成長ホルモン分泌</td></tr>
+                        <tr><td><strong>Theta波</strong></td><td>4-8Hz</td><td>REM睡眠、記憶の固定、創造性</td></tr>
+                        <tr><td><strong>Alpha波</strong></td><td>8-13Hz</td><td>リラックス、デフォルトモードネットワーク</td></tr>
+                        <tr><td><strong>Beta波</strong></td><td>13-30Hz</td><td>集中、実行機能、ワーキングメモリ</td></tr>
+                        <tr><td><strong>Gamma波</strong></td><td>30-50Hz</td><td>意識の統合、高次認知機能</td></tr>
                     </tbody>
                 </table>
                 
@@ -921,23 +920,13 @@
                     <p><strong>耳石器刺激（100-500Hz）：</strong><br>
                     • 卵形嚢と球形嚢の有毛細胞を振動刺激<br>
                     • 重力感覚と直線加速度の知覚を活性化</p>
-                    
                     <p><strong>三半規管への影響（100Hz付近）：</strong><br>
                     • 回転感覚の処理系を刺激<br>
                     • 前庭-眼反射（VOR）の調整</p>
-                    
                     <p><strong>前庭-自律神経系の連携：</strong><br>
                     • 交感神経/副交感神経バランスの調整<br>
                     • 覚醒レベルの最適化</p>
                 </div>
-                
-                <h3 style="color: #667eea; margin: 20px 0 10px; font-size: 1.2em;">⚡ 統合的神経刺激</h3>
-                <p>これらの要素を組み合わせることで、個人に最適化された神経刺激プロトコルを作成できます：</p>
-                <ul style="color: #666; margin: 10px 0 10px 20px; font-size: 0.95em;">
-                    <li><strong>聴覚-前庭統合：</strong>空間認知とバランス機能の向上</li>
-                    <li><strong>脳波-認知機能連携：</strong>タスクに応じた最適な脳状態の誘導</li>
-                    <li><strong>神経可塑性の促進：</strong>新しい神経回路の形成と既存回路の強化</li>
-                </ul>
                 
                 <h3 style="color: #667eea; margin: 20px 0 10px; font-size: 1.2em;">🔬 神経科学的原理</h3>
                 <p>• <strong>ヘブ則：</strong>同時に発火するニューロン間の結合が強化される<br>
@@ -963,7 +952,7 @@
                 
                 <div class="slider-container">
                     <div class="slider-label">
-                        <span>Left Ear</span>
+                        <span>Left Ear (Main)</span>
                         <span id="leftFreqLabel">440 Hz</span>
                     </div>
                     <input type="range" class="slider" id="leftFreq" min="20" max="20000" value="440" step="1">
@@ -971,29 +960,32 @@
                 
                 <div class="slider-container">
                     <div class="slider-label">
-                        <span>Right Ear</span>
+                        <span>Right Ear (Main)</span>
                         <span id="rightFreqLabel">448 Hz</span>
                     </div>
                     <input type="range" class="slider" id="rightFreq" min="20" max="20000" value="448" step="1">
                 </div>
 
                 <div class="preset-grid">
-                    <button class="preset-btn" onclick="setPresetFrequency('left', 100)">
-                        <span class="preset-freq">L: 100Hz</span>
+                    <button class="preset-btn" id="toneL100" onclick="toggleTone('left', 100)">
+                        <span class="preset-freq">L: +100Hz</span>
                         <span class="preset-desc">耳石器＋三半規管<br>(骨伝導推奨)</span>
                     </button>
-                    <button class="preset-btn" onclick="setPresetFrequency('left', 500)">
-                        <span class="preset-freq">L: 500Hz</span>
+                    <button class="preset-btn" id="toneL500" onclick="toggleTone('left', 500)">
+                        <span class="preset-freq">L: +500Hz</span>
                         <span class="preset-desc">耳石器<br>(骨伝導推奨)</span>
                     </button>
-                    <button class="preset-btn" onclick="setPresetFrequency('right', 100)">
-                        <span class="preset-freq">R: 100Hz</span>
+                    <button class="preset-btn" id="toneR100" onclick="toggleTone('right', 100)">
+                        <span class="preset-freq">R: +100Hz</span>
                         <span class="preset-desc">耳石器＋三半規管<br>(骨伝導推奨)</span>
                     </button>
-                    <button class="preset-btn" onclick="setPresetFrequency('right', 500)">
-                        <span class="preset-freq">R: 500Hz</span>
+                    <button class="preset-btn" id="toneR500" onclick="toggleTone('right', 500)">
+                        <span class="preset-freq">R: +500Hz</span>
                         <span class="preset-desc">耳石器<br>(骨伝導推奨)</span>
                     </button>
+                </div>
+                <div class="tone-hint">
+                    ボタンをタップでメイン周波数に重ねて同時再生。<br>もう一度タップで解除。複数選択できます。
                 </div>
             </div>
 
@@ -1138,6 +1130,9 @@
         </div>
     </nav>
 
+    <!-- トースト通知 -->
+    <div class="toast" id="toast"></div>
+
     <script>
         // グローバル変数
         let audioContext = null;
@@ -1173,73 +1168,55 @@
         let smoothMovement = false;
         let movementSpeed = 1;
         let smoothAnimationFrame = null;
-        let movementTime = 0;
         let movementPath = null;
         let pathProgress = 0;
         let soundTrail = [];
 
-        // PWA Service Worker登録
+        // 追加トーン管理（同時出力）
+        // 各耳で 100Hz / 500Hz のオン・オフ状態
+        let extraTones = {
+            left: { 100: false, 500: false },
+            right: { 100: false, 500: false }
+        };
+        // 追加トーン用オシレーター（再生中のみ生成）
+        let extraOscillators = [];
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
-                }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
+                navigator.serviceWorker.register('sw.js').then(function() {}, function(err) {
+                    console.log('SW failed: ', err);
                 });
             });
         }
 
-        // 初期化
         window.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
             updateLogoUrls();
             setupFullscreen();
-            
-            // スプラッシュスクリーンの処理
             setTimeout(() => {
-                console.log('Hiding splash screen');
                 document.getElementById('splashScreen').classList.add('hidden');
                 document.getElementById('appContainer').style.display = 'flex';
                 initializeApp();
             }, 2000);
         });
 
-        // ロゴURLの更新
         function updateLogoUrls() {
             const baseUrl = `https://raw.githubusercontent.com/${githubRepo}/main/`;
-            
             const splashLogo = document.getElementById('splashLogo');
-            if (splashLogo) {
-                splashLogo.src = baseUrl + 'FNT512.png';
-                splashLogo.onerror = function() {
-                    console.log('Splash logo failed to load');
-                };
-            }
-            
+            if (splashLogo) splashLogo.src = baseUrl + 'FNT512.png';
             const headerLogo = document.getElementById('headerLogo');
-            if (headerLogo) {
-                headerLogo.src = baseUrl + 'FNT512-transparent.png';
-                headerLogo.onerror = function() {
-                    console.log('Header logo failed to load');
-                };
-            }
+            if (headerLogo) headerLogo.src = baseUrl + 'FNT512-transparent.png';
         }
 
-        // 全画面設定
         function setupFullscreen() {
             document.addEventListener('click', enterFullscreenOnce);
             document.addEventListener('touchstart', enterFullscreenOnce);
-            
             document.addEventListener('touchmove', function(e) {
                 if (!e.target.closest('.menu-content')) {
                     e.preventDefault();
                 }
             }, { passive: false });
-            
             document.body.addEventListener('touchstart', function(e) {
-                if (e.touches.length > 1) {
-                    e.preventDefault();
-                }
+                if (e.touches.length > 1) e.preventDefault();
             }, { passive: false });
         }
 
@@ -1251,21 +1228,14 @@
 
         function enterFullscreen() {
             const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(() => {});
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
         }
 
-        // アプリ初期化
         function initializeApp() {
-            console.log('Initializing app');
             canvas = document.getElementById('spatial3DCanvas');
             ctx = canvas.getContext('2d');
-            
             canvas.addEventListener('mousedown', startDrag);
             canvas.addEventListener('mousemove', drag);
             canvas.addEventListener('mouseup', endDrag);
@@ -1273,17 +1243,24 @@
             canvas.addEventListener('touchstart', startDrag);
             canvas.addEventListener('touchmove', drag);
             canvas.addEventListener('touchend', endDrag);
-            
             updateFrequencyDifference();
             draw3DSpace();
             setupEventListeners();
         }
 
-        // メニュー制御
+        // トースト通知
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2200);
+        }
+
         function toggleMenu() {
             const menu = document.getElementById('sideMenu');
             const overlay = document.getElementById('menuOverlay');
-            
             if (menu.classList.contains('open')) {
                 closeMenu();
             } else {
@@ -1297,7 +1274,6 @@
             document.getElementById('menuOverlay').classList.remove('visible');
         }
 
-        // イベントリスナー設定
         function setupEventListeners() {
             document.getElementById('leftFreq').addEventListener('input', function() {
                 const freq = this.value;
@@ -1348,11 +1324,8 @@
             });
 
             document.getElementById('randomBpm').addEventListener('change', function() {
-                if (this.checked && isPlaying) {
-                    startRandomBPM();
-                } else {
-                    stopRandomBPM();
-                }
+                if (this.checked && isPlaying) startRandomBPM();
+                else stopRandomBPM();
             });
 
             document.getElementById('heightSlider').addEventListener('input', function() {
@@ -1374,397 +1347,79 @@
             });
         }
 
-        // スムーズ移動のトグル
-        function toggleSmoothMovement() {
-            smoothMovement = document.getElementById('smoothMovement').checked;
-            const speedControl = document.getElementById('movementSpeedControl');
+        // ===== 同時出力（追加トーン）=====
+        function toggleTone(ear, freq) {
+            extraTones[ear][freq] = !extraTones[ear][freq];
             
-            if (smoothMovement) {
-                speedControl.style.display = 'block';
-                if (spatialAudioActive && isPlaying && !manualMode) {
-                    if (spatialInterval) {
-                        clearInterval(spatialInterval);
-                        spatialInterval = null;
-                    }
-                    generateNewPath();
-                    startSmoothMovement();
-                }
+            // ボタンの見た目を更新
+            const earChar = ear === 'left' ? 'L' : 'R';
+            const btn = document.getElementById('tone' + earChar + freq);
+            if (extraTones[ear][freq]) {
+                btn.classList.add('tone-active');
             } else {
-                speedControl.style.display = 'none';
-                if (smoothAnimationFrame) {
-                    cancelAnimationFrame(smoothAnimationFrame);
-                    smoothAnimationFrame = null;
-                }
-                if (spatialAudioActive && isPlaying && !manualMode) {
-                    updateSpatialPosition();
-                    spatialInterval = setInterval(() => {
-                        updateSpatialPosition();
-                    }, 2000);
-                }
+                btn.classList.remove('tone-active');
+            }
+            
+            updateExtraDisplay();
+            
+            // 再生中なら追加トーンを即座に反映
+            if (isPlaying) {
+                rebuildExtraOscillators();
             }
         }
 
-        // 新しいパスを生成
-        function generateNewPath() {
-            const points = [];
-            const numPoints = 3 + Math.floor(Math.random() * 5); // 3-7点のランダム
-            
-            // ランダムな開始位置
-            let currentAngle = Math.random() * Math.PI * 2;
-            let angleVelocity = (Math.random() - 0.5) * 2; // 回転速度
-            
-            for (let i = 0; i < numPoints; i++) {
-                // 回転方向をランダムに変更
-                if (Math.random() < 0.3) {
-                    angleVelocity = (Math.random() - 0.5) * 3;
-                }
-                
-                currentAngle += angleVelocity + (Math.random() - 0.5) * 1.5;
-                
-                // より広範囲にランダムな半径
-                const radius = 0.1 + Math.random() * 0.8;
-                
-                // 高さもよりダイナミックに
-                const height = (Math.random() - 0.5) * 1.2;
-                
-                points.push({
-                    x: Math.cos(currentAngle) * radius,
-                    y: height,
-                    z: Math.sin(currentAngle) * radius
-                });
-            }
-            
-            // ランダムに閉じたパスか開いたパスにする
-            if (Math.random() < 0.5) {
-                points.push(points[0]); // 閉じる
-            } else {
-                // 新しいランダムな終点
-                const endAngle = Math.random() * Math.PI * 2;
-                const endRadius = 0.1 + Math.random() * 0.8;
-                points.push({
-                    x: Math.cos(endAngle) * endRadius,
-                    y: (Math.random() - 0.5) * 1.2,
-                    z: Math.sin(endAngle) * endRadius
-                });
-            }
-            
-            movementPath = points;
-            pathProgress = 0;
+        // 追加トーン表示を更新
+        function updateExtraDisplay() {
+            ['left', 'right'].forEach(ear => {
+                const active = [];
+                if (extraTones[ear][100]) active.push('+100');
+                if (extraTones[ear][500]) active.push('+500');
+                const display = document.getElementById(ear + 'ExtraDisplay');
+                display.textContent = active.length ? active.join(' ') + ' Hz' : '';
+            });
         }
 
-        // スムーズな移動を開始
-        function startSmoothMovement() {
-            if (!smoothMovement || !spatialAudioActive || manualMode) return;
+        // 追加トーンのオシレーターを再構築
+        function rebuildExtraOscillators() {
+            // 既存の追加オシレーターを停止・削除
+            extraOscillators.forEach(osc => {
+                try { osc.stop(); } catch(e) {}
+            });
+            extraOscillators = [];
             
-            let lastTime = Date.now();
-            let pathChangeTimer = 0;
-            const pathChangeDuration = 3000 + Math.random() * 4000; // 3-7秒でパス変更
+            if (!isPlaying || !audioContext) return;
             
-            const animate = () => {
-                if (!smoothMovement || !spatialAudioActive || manualMode || !isPlaying) {
-                    smoothAnimationFrame = null;
-                    return;
-                }
-                
-                const currentTime = Date.now();
-                const deltaTime = currentTime - lastTime;
-                lastTime = currentTime;
-                
-                // パス変更タイマー
-                pathChangeTimer += deltaTime;
-                if (pathChangeTimer > pathChangeDuration || !movementPath || movementPath.length < 2) {
-                    generateNewPath();
-                    pathChangeTimer = 0;
-                }
-                
-                // パスに沿って移動（速度を2倍に）
-                const speed = movementSpeed * 0.004 * (deltaTime / 16.67); // 基準速度を2倍に
-                pathProgress += speed;
-                
-                if (pathProgress >= movementPath.length - 1) {
-                    generateNewPath();
-                    pathProgress = 0;
-                }
-                
-                const index = Math.floor(pathProgress);
-                const t = pathProgress - index;
-                
-                const p1 = movementPath[index];
-                const p2 = movementPath[(index + 1) % movementPath.length];
-                
-                // Catmull-Rom補間でより滑らかに
-                const p0 = movementPath[Math.max(0, index - 1)];
-                const p3 = movementPath[Math.min(movementPath.length - 1, index + 2)];
-                
-                const t2 = t * t;
-                const t3 = t2 * t;
-                
-                targetSoundX = 0.5 * ((2 * p1.x) + 
-                    (-p0.x + p2.x) * t + 
-                    (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + 
-                    (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
-                    
-                targetSoundY = 0.5 * ((2 * p1.y) + 
-                    (-p0.y + p2.y) * t + 
-                    (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + 
-                    (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
-                    
-                targetSoundZ = 0.5 * ((2 * p1.z) + 
-                    (-p0.z + p2.z) * t + 
-                    (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t2 + 
-                    (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t3);
-                
-                // ランダムなノイズを追加
-                const noiseScale = 0.02 * movementSpeed;
-                targetSoundX += (Math.random() - 0.5) * noiseScale;
-                targetSoundY += (Math.random() - 0.5) * noiseScale;
-                targetSoundZ += (Math.random() - 0.5) * noiseScale;
-                
-                // 現在位置を目標位置に向けて滑らかに移動（速度に応じて調整）
-                const lerpFactor = 0.08 * Math.sqrt(movementSpeed);
-                currentSoundX += (targetSoundX - currentSoundX) * lerpFactor;
-                currentSoundY += (targetSoundY - currentSoundY) * lerpFactor;
-                currentSoundZ += (targetSoundZ - currentSoundZ) * lerpFactor;
-                
-                // 境界チェック
-                const maxDist = 1.0;
-                const currentDist = Math.sqrt(currentSoundX * currentSoundX + currentSoundZ * currentSoundZ);
-                if (currentDist > maxDist) {
-                    const scale = maxDist / currentDist;
-                    currentSoundX *= scale;
-                    currentSoundZ *= scale;
-                }
-                currentSoundY = Math.max(-1, Math.min(1, currentSoundY));
-                
-                // トレイルを更新
-                soundTrail.push({ x: currentSoundX, y: currentSoundY, z: currentSoundZ });
-                if (soundTrail.length > 30) { // トレイルを少し長く
-                    soundTrail.shift();
-                }
-                
-                setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
-                
-                smoothAnimationFrame = requestAnimationFrame(animate);
-            };
-            
-            animate();
-        }
-
-        // 3D空間の描画
-        function draw3DSpace() {
-            if (!ctx || !canvas) return;
-            
-            const width = canvas.width = window.innerWidth;
-            const height = canvas.height = window.innerHeight;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const maxRadius = Math.min(width, height) * 0.4;
-            
-            // 背景グラデーション（薄い円）
-            const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius * 1.5);
-            bgGradient.addColorStop(0, 'rgba(102, 126, 234, 0.02)');
-            bgGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = bgGradient;
-            ctx.fillRect(0, 0, width, height);
-            
-            // 同心円グリッド（距離を示す円）
-            ctx.strokeStyle = 'rgba(102, 126, 234, 0.1)';
-            ctx.lineWidth = 1;
-            
-            // 5つの同心円を描画（20%, 40%, 60%, 80%, 100%の距離）
-            for (let i = 1; i <= 5; i++) {
-                const r = (maxRadius / 5) * i;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            
-            // さらに細かい同心円（薄く）
-            ctx.strokeStyle = 'rgba(102, 126, 234, 0.05)';
-            ctx.lineWidth = 0.5;
-            for (let i = 1; i <= 10; i++) {
-                const r = (maxRadius / 10) * i;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            
-            // 十字線
-            ctx.strokeStyle = 'rgba(102, 126, 234, 0.08)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY - maxRadius);
-            ctx.lineTo(centerX, centerY + maxRadius);
-            ctx.moveTo(centerX - maxRadius, centerY);
-            ctx.lineTo(centerX + maxRadius, centerY);
-            ctx.stroke();
-            
-            // 斜めの補助線（45度）
-            ctx.strokeStyle = 'rgba(102, 126, 234, 0.04)';
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            const diag = maxRadius * 0.707; // 45度の時の長さ
-            ctx.moveTo(centerX - diag, centerY - diag);
-            ctx.lineTo(centerX + diag, centerY + diag);
-            ctx.moveTo(centerX + diag, centerY - diag);
-            ctx.lineTo(centerX - diag, centerY + diag);
-            ctx.stroke();
-            
-            // 方向ラベル
-            ctx.fillStyle = 'rgba(102, 126, 234, 0.4)';
-            ctx.font = '11px -apple-system, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('FRONT', centerX, centerY - maxRadius - 10);
-            ctx.fillText('BACK', centerX, centerY + maxRadius + 20);
-            ctx.fillText('LEFT', centerX - maxRadius - 30, centerY + 3);
-            ctx.fillText('RIGHT', centerX + maxRadius + 30, centerY + 3);
-            
-            // リスナー位置（中心）
-            const listenerGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 12);
-            listenerGradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
-            listenerGradient.addColorStop(1, 'rgba(102, 126, 234, 0.2)');
-            ctx.fillStyle = listenerGradient;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 8px -apple-system, sans-serif';
-            ctx.fillText('YOU', centerX, centerY + 2);
-            
-            // 音源の位置（3D効果）
-            if (spatialAudioActive) {
-                // トレイルを描画（スムーズ移動時）
-                if (smoothMovement && soundTrail.length > 1) {
-                    ctx.strokeStyle = 'rgba(240, 147, 251, 0.3)';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    for (let i = 0; i < soundTrail.length; i++) {
-                        const point = soundTrail[i];
-                        const x = centerX + point.x * maxRadius;
-                        const y = centerY - point.z * maxRadius;
-                        
-                        if (i === 0) {
-                            ctx.moveTo(x, y);
-                        } else {
-                            ctx.lineTo(x, y);
-                        }
+            // 各耳の追加トーンを生成
+            [['left', leftGain], ['right', rightGain]].forEach(([ear, gainNode]) => {
+                if (!gainNode) return;
+                [100, 500].forEach(freq => {
+                    if (extraTones[ear][freq]) {
+                        const osc = audioContext.createOscillator();
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        // 追加トーンは少し控えめの音量にして合算時のクリップを防ぐ
+                        const toneGain = audioContext.createGain();
+                        toneGain.gain.value = 0.7;
+                        osc.connect(toneGain);
+                        toneGain.connect(gainNode);
+                        osc.start();
+                        extraOscillators.push(osc);
                     }
-                    ctx.stroke();
-                }
-                
-                const x = centerX + currentSoundX * maxRadius;
-                const y = centerY - currentSoundZ * maxRadius;
-                const size = 15 + Math.abs(currentSoundY) * 10;
-                
-                // 高さによる色の変化
-                let hue, saturation, lightness;
-                if (currentSoundY > 0.3) {
-                    hue = 340; // ピンク系
-                    saturation = 80;
-                    lightness = 60;
-                } else if (currentSoundY < -0.3) {
-                    hue = 250; // 紫系
-                    saturation = 70;
-                    lightness = 50;
-                } else {
-                    hue = 280; // 中間（薄紫）
-                    saturation = 60;
-                    lightness = 55;
-                }
-                
-                // パルスアニメーション
-                const time = Date.now() / 1000;
-                const pulse = Math.sin(time * 3) * 0.2 + 1;
-                
-                // 外側の波紋エフェクト
-                for (let i = 3; i > 0; i--) {
-                    ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${0.15 / i})`;
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.arc(x, y, size * pulse + (i * 15), 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                // 音源本体（グラデーション）
-                const soundGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-                soundGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness + 20}%, 0.9)`);
-                soundGradient.addColorStop(1, `hsla(${hue}, ${saturation}%, ${lightness}%, 0.5)`);
-                
-                ctx.fillStyle = soundGradient;
-                ctx.beginPath();
-                ctx.arc(x, y, size * pulse, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 内側の光
-                ctx.fillStyle = `hsla(${hue}, ${saturation}%, 90%, 0.8)`;
-                ctx.beginPath();
-                ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 高さインジケーター
-                if (Math.abs(currentSoundY) > 0.1) {
-                    ctx.save();
-                    ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.6)`;
-                    ctx.font = 'bold 16px -apple-system, sans-serif';
-                    ctx.textAlign = 'center';
-                    const heightText = currentSoundY > 0 ? '▲' : '▼';
-                    ctx.fillText(heightText, x, y - size - 10);
-                    ctx.restore();
-                }
-            }
-            
-            requestAnimationFrame(draw3DSpace);
+                });
+            });
         }
 
-        // Audio初期化
         function initAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // iOS対策: サスペンド状態を解除
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
+                if (audioContext.state === 'suspended') audioContext.resume();
             }
-            
-            // iOS Safari対策: ユーザー操作後にコンテキストを再開
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+            if (audioContext.state === 'suspended') audioContext.resume();
         }
 
-        // 周波数プリセット
-        function setPresetFrequency(ear, freq) {
-            if (ear === 'left') {
-                document.getElementById('leftFreq').value = freq;
-                document.getElementById('leftFreqLabel').textContent = freq + ' Hz';
-                document.getElementById('leftFreqDisplay').textContent = freq + ' Hz';
-                
-                if (isPlaying && leftOscillator) {
-                    leftOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-                }
-            } else if (ear === 'right') {
-                document.getElementById('rightFreq').value = freq;
-                document.getElementById('rightFreqLabel').textContent = freq + ' Hz';
-                document.getElementById('rightFreqDisplay').textContent = freq + ' Hz';
-                
-                if (isPlaying && rightOscillator) {
-                    rightOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-                }
-            }
-            
-            updateFrequencyDifference();
-        }
-
-        // 脳波プリセット
         function setBrainwavePreset(waveType) {
             const baseFreq = parseFloat(document.getElementById('leftFreq').value);
             let difference = 0;
-            
             switch(waveType) {
                 case 'delta': difference = 2; break;
                 case 'theta': difference = 6; break;
@@ -1772,28 +1427,21 @@
                 case 'beta': difference = 20; break;
                 case 'gamma': difference = 40; break;
             }
-            
             const rightFreq = Math.max(20, Math.min(20000, baseFreq + difference));
-            
             document.getElementById('rightFreq').value = rightFreq;
             document.getElementById('rightFreqLabel').textContent = rightFreq + ' Hz';
             document.getElementById('rightFreqDisplay').textContent = rightFreq + ' Hz';
-            
             updateFrequencyDifference();
-            
             if (isPlaying && rightOscillator) {
                 rightOscillator.frequency.setValueAtTime(rightFreq, audioContext.currentTime);
             }
         }
 
-        // 周波数差の更新
         function updateFrequencyDifference() {
             const leftFreq = parseFloat(document.getElementById('leftFreq').value);
             const rightFreq = parseFloat(document.getElementById('rightFreq').value);
             const diff = Math.abs(rightFreq - leftFreq);
-            
             document.getElementById('freqDifference').textContent = diff.toFixed(1) + ' Hz';
-            
             let waveType = '';
             if (diff >= 0.5 && diff < 4) waveType = '(Delta)';
             else if (diff >= 4 && diff < 8) waveType = '(Theta)';
@@ -1802,11 +1450,9 @@
             else if (diff >= 30 && diff <= 50) waveType = '(Gamma)';
             else if (diff > 50) waveType = '(Out of range)';
             else waveType = '(Mono)';
-            
             document.getElementById('currentWaveType').textContent = waveType;
         }
 
-        // 音量更新
         function updateVolume() {
             if (leftGain && !leftMuted) {
                 leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
@@ -1816,84 +1462,64 @@
             }
         }
 
-        // BPM更新
         function updateBPM(bpm) {
-            if (bpmInterval) {
-                clearInterval(bpmInterval);
-            }
-            
+            if (bpmInterval) clearInterval(bpmInterval);
             const interval = 60000 / bpm;
-            
             bpmInterval = setInterval(() => {
                 if (leftGain && rightGain) {
                     const now = audioContext.currentTime;
-                    
                     if (!leftMuted) {
+                        const v = spatialAudioActive ? leftGain.gain.value : 0.3 * masterVolume * leftVolume;
                         leftGain.gain.cancelScheduledValues(now);
-                        const currentLeftVolume = spatialAudioActive ? leftGain.gain.value : 0.3 * masterVolume * leftVolume;
-                        leftGain.gain.setValueAtTime(currentLeftVolume, now);
+                        leftGain.gain.setValueAtTime(v, now);
                         leftGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                        leftGain.gain.exponentialRampToValueAtTime(currentLeftVolume, now + 0.1);
+                        leftGain.gain.exponentialRampToValueAtTime(v, now + 0.1);
                     }
-                    
                     if (!rightMuted) {
+                        const v = spatialAudioActive ? rightGain.gain.value : 0.3 * masterVolume * rightVolume;
                         rightGain.gain.cancelScheduledValues(now);
-                        const currentRightVolume = spatialAudioActive ? rightGain.gain.value : 0.3 * masterVolume * rightVolume;
-                        rightGain.gain.setValueAtTime(currentRightVolume, now);
+                        rightGain.gain.setValueAtTime(v, now);
                         rightGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                        rightGain.gain.exponentialRampToValueAtTime(currentRightVolume, now + 0.1);
+                        rightGain.gain.exponentialRampToValueAtTime(v, now + 0.1);
                     }
                 }
             }, interval);
         }
 
-        // 左耳ミュートトグル
         function toggleLeftMute() {
             leftMuted = !leftMuted;
             const btn = document.getElementById('leftMuteBtn');
             const text = document.getElementById('leftMuteText');
-            
             if (leftMuted) {
                 text.textContent = 'Left OFF';
                 btn.style.background = 'linear-gradient(135deg, #f093fb, #f5576c)';
                 btn.style.color = 'white';
-                if (leftGain) {
-                    leftGain.gain.setValueAtTime(0, audioContext.currentTime);
-                }
+                if (leftGain) leftGain.gain.setValueAtTime(0, audioContext.currentTime);
             } else {
                 text.textContent = 'Left ON';
                 btn.style.background = 'white';
                 btn.style.color = '#333';
-                if (leftGain) {
-                    leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
-                }
+                if (leftGain) leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume, audioContext.currentTime);
             }
         }
 
-        // 右耳ミュートトグル
         function toggleRightMute() {
             rightMuted = !rightMuted;
             const btn = document.getElementById('rightMuteBtn');
             const text = document.getElementById('rightMuteText');
-            
             if (rightMuted) {
                 text.textContent = 'Right OFF';
                 btn.style.background = 'linear-gradient(135deg, #f093fb, #f5576c)';
                 btn.style.color = 'white';
-                if (rightGain) {
-                    rightGain.gain.setValueAtTime(0, audioContext.currentTime);
-                }
+                if (rightGain) rightGain.gain.setValueAtTime(0, audioContext.currentTime);
             } else {
                 text.textContent = 'Right ON';
                 btn.style.background = 'white';
                 btn.style.color = '#333';
-                if (rightGain) {
-                    rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
-                }
+                if (rightGain) rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume, audioContext.currentTime);
             }
         }
 
-        // ランダムBPM
         function startRandomBPM() {
             randomBpmInterval = setInterval(() => {
                 const randomBpm = Math.floor(Math.random() * (180 - 60 + 1)) + 60;
@@ -1910,63 +1536,250 @@
             }
         }
 
-        // 3D音響トグル
+        function toggleSmoothMovement() {
+            smoothMovement = document.getElementById('smoothMovement').checked;
+            const speedControl = document.getElementById('movementSpeedControl');
+            if (smoothMovement) {
+                speedControl.style.display = 'block';
+                if (spatialAudioActive && isPlaying && !manualMode) {
+                    if (spatialInterval) { clearInterval(spatialInterval); spatialInterval = null; }
+                    generateNewPath();
+                    startSmoothMovement();
+                }
+            } else {
+                speedControl.style.display = 'none';
+                if (smoothAnimationFrame) { cancelAnimationFrame(smoothAnimationFrame); smoothAnimationFrame = null; }
+                if (spatialAudioActive && isPlaying && !manualMode) {
+                    updateSpatialPosition();
+                    spatialInterval = setInterval(() => updateSpatialPosition(), 2000);
+                }
+            }
+        }
+
+        function generateNewPath() {
+            const points = [];
+            const numPoints = 3 + Math.floor(Math.random() * 5);
+            let currentAngle = Math.random() * Math.PI * 2;
+            let angleVelocity = (Math.random() - 0.5) * 2;
+            for (let i = 0; i < numPoints; i++) {
+                if (Math.random() < 0.3) angleVelocity = (Math.random() - 0.5) * 3;
+                currentAngle += angleVelocity + (Math.random() - 0.5) * 1.5;
+                const radius = 0.1 + Math.random() * 0.8;
+                const height = (Math.random() - 0.5) * 1.2;
+                points.push({ x: Math.cos(currentAngle) * radius, y: height, z: Math.sin(currentAngle) * radius });
+            }
+            if (Math.random() < 0.5) {
+                points.push(points[0]);
+            } else {
+                const endAngle = Math.random() * Math.PI * 2;
+                const endRadius = 0.1 + Math.random() * 0.8;
+                points.push({ x: Math.cos(endAngle) * endRadius, y: (Math.random() - 0.5) * 1.2, z: Math.sin(endAngle) * endRadius });
+            }
+            movementPath = points;
+            pathProgress = 0;
+        }
+
+        function startSmoothMovement() {
+            if (!smoothMovement || !spatialAudioActive || manualMode) return;
+            let lastTime = Date.now();
+            let pathChangeTimer = 0;
+            const pathChangeDuration = 3000 + Math.random() * 4000;
+            const animate = () => {
+                if (!smoothMovement || !spatialAudioActive || manualMode || !isPlaying) {
+                    smoothAnimationFrame = null;
+                    return;
+                }
+                const currentTime = Date.now();
+                const deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+                pathChangeTimer += deltaTime;
+                if (pathChangeTimer > pathChangeDuration || !movementPath || movementPath.length < 2) {
+                    generateNewPath();
+                    pathChangeTimer = 0;
+                }
+                const speed = movementSpeed * 0.004 * (deltaTime / 16.67);
+                pathProgress += speed;
+                if (pathProgress >= movementPath.length - 1) {
+                    generateNewPath();
+                    pathProgress = 0;
+                }
+                const index = Math.floor(pathProgress);
+                const t = pathProgress - index;
+                const p1 = movementPath[index];
+                const p2 = movementPath[(index + 1) % movementPath.length];
+                const p0 = movementPath[Math.max(0, index - 1)];
+                const p3 = movementPath[Math.min(movementPath.length - 1, index + 2)];
+                const t2 = t * t;
+                const t3 = t2 * t;
+                targetSoundX = 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
+                targetSoundY = 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
+                targetSoundZ = 0.5 * ((2 * p1.z) + (-p0.z + p2.z) * t + (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t2 + (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t3);
+                const noiseScale = 0.02 * movementSpeed;
+                targetSoundX += (Math.random() - 0.5) * noiseScale;
+                targetSoundY += (Math.random() - 0.5) * noiseScale;
+                targetSoundZ += (Math.random() - 0.5) * noiseScale;
+                const lerpFactor = 0.08 * Math.sqrt(movementSpeed);
+                currentSoundX += (targetSoundX - currentSoundX) * lerpFactor;
+                currentSoundY += (targetSoundY - currentSoundY) * lerpFactor;
+                currentSoundZ += (targetSoundZ - currentSoundZ) * lerpFactor;
+                const currentDist = Math.sqrt(currentSoundX * currentSoundX + currentSoundZ * currentSoundZ);
+                if (currentDist > 1) {
+                    const scale = 1 / currentDist;
+                    currentSoundX *= scale;
+                    currentSoundZ *= scale;
+                }
+                currentSoundY = Math.max(-1, Math.min(1, currentSoundY));
+                soundTrail.push({ x: currentSoundX, y: currentSoundY, z: currentSoundZ });
+                if (soundTrail.length > 30) soundTrail.shift();
+                setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
+                smoothAnimationFrame = requestAnimationFrame(animate);
+            };
+            animate();
+        }
+
+        function draw3DSpace() {
+            if (!ctx || !canvas) return;
+            const width = canvas.width = window.innerWidth;
+            const height = canvas.height = window.innerHeight;
+            ctx.clearRect(0, 0, width, height);
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const maxRadius = Math.min(width, height) * 0.4;
+            const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius * 1.5);
+            bgGradient.addColorStop(0, 'rgba(102, 126, 234, 0.02)');
+            bgGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 5; i++) {
+                const r = (maxRadius / 5) * i;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.05)';
+            ctx.lineWidth = 0.5;
+            for (let i = 1; i <= 10; i++) {
+                const r = (maxRadius / 10) * i;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - maxRadius);
+            ctx.lineTo(centerX, centerY + maxRadius);
+            ctx.moveTo(centerX - maxRadius, centerY);
+            ctx.lineTo(centerX + maxRadius, centerY);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.04)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            const diag = maxRadius * 0.707;
+            ctx.moveTo(centerX - diag, centerY - diag);
+            ctx.lineTo(centerX + diag, centerY + diag);
+            ctx.moveTo(centerX + diag, centerY - diag);
+            ctx.lineTo(centerX - diag, centerY + diag);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.4)';
+            ctx.font = '11px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('FRONT', centerX, centerY - maxRadius - 10);
+            ctx.fillText('BACK', centerX, centerY + maxRadius + 20);
+            ctx.fillText('LEFT', centerX - maxRadius - 30, centerY + 3);
+            ctx.fillText('RIGHT', centerX + maxRadius + 30, centerY + 3);
+            const listenerGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 12);
+            listenerGradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
+            listenerGradient.addColorStop(1, 'rgba(102, 126, 234, 0.2)');
+            ctx.fillStyle = listenerGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 8px -apple-system, sans-serif';
+            ctx.fillText('YOU', centerX, centerY + 2);
+            if (spatialAudioActive) {
+                if (smoothMovement && soundTrail.length > 1) {
+                    ctx.strokeStyle = 'rgba(240, 147, 251, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    for (let i = 0; i < soundTrail.length; i++) {
+                        const point = soundTrail[i];
+                        const x = centerX + point.x * maxRadius;
+                        const y = centerY - point.z * maxRadius;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+                const x = centerX + currentSoundX * maxRadius;
+                const y = centerY - currentSoundZ * maxRadius;
+                const size = 15 + Math.abs(currentSoundY) * 10;
+                let hue, saturation, lightness;
+                if (currentSoundY > 0.3) { hue = 340; saturation = 80; lightness = 60; }
+                else if (currentSoundY < -0.3) { hue = 250; saturation = 70; lightness = 50; }
+                else { hue = 280; saturation = 60; lightness = 55; }
+                const time = Date.now() / 1000;
+                const pulse = Math.sin(time * 3) * 0.2 + 1;
+                for (let i = 3; i > 0; i--) {
+                    ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${0.15 / i})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size * pulse + (i * 15), 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                const soundGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+                soundGradient.addColorStop(0, `hsla(${hue}, ${saturation}%, ${lightness + 20}%, 0.9)`);
+                soundGradient.addColorStop(1, `hsla(${hue}, ${saturation}%, ${lightness}%, 0.5)`);
+                ctx.fillStyle = soundGradient;
+                ctx.beginPath();
+                ctx.arc(x, y, size * pulse, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = `hsla(${hue}, ${saturation}%, 90%, 0.8)`;
+                ctx.beginPath();
+                ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                if (Math.abs(currentSoundY) > 0.1) {
+                    ctx.save();
+                    ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.6)`;
+                    ctx.font = 'bold 16px -apple-system, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(currentSoundY > 0 ? '▲' : '▼', x, y - size - 10);
+                    ctx.restore();
+                }
+            }
+            requestAnimationFrame(draw3DSpace);
+        }
+
         function toggleSpatialAudio() {
             spatialAudioActive = document.getElementById('spatialAudio').checked;
             const heightControl = document.getElementById('heightControl');
-            
             if (spatialAudioActive) {
                 heightControl.style.display = 'block';
-                if (isPlaying) {
-                    stopSound();
-                    setTimeout(() => startSound(), 100);
-                }
+                if (isPlaying) { stopSound(); setTimeout(() => startSound(), 100); }
             } else {
                 heightControl.style.display = 'none';
-                if (spatialInterval) {
-                    clearInterval(spatialInterval);
-                    spatialInterval = null;
-                }
-                if (smoothAnimationFrame) {
-                    cancelAnimationFrame(smoothAnimationFrame);
-                    smoothAnimationFrame = null;
-                }
-                if (isPlaying) {
-                    stopSound();
-                    setTimeout(() => startSound(), 100);
-                }
+                if (spatialInterval) { clearInterval(spatialInterval); spatialInterval = null; }
+                if (smoothAnimationFrame) { cancelAnimationFrame(smoothAnimationFrame); smoothAnimationFrame = null; }
+                if (isPlaying) { stopSound(); setTimeout(() => startSound(), 100); }
             }
         }
 
-        // 手動モードトグル
         function toggleManualMode() {
             manualMode = document.getElementById('manualMode').checked;
-            
             if (spatialAudioActive && isPlaying) {
                 if (manualMode) {
-                    if (spatialInterval) {
-                        clearInterval(spatialInterval);
-                        spatialInterval = null;
-                    }
-                    if (smoothAnimationFrame) {
-                        cancelAnimationFrame(smoothAnimationFrame);
-                        smoothAnimationFrame = null;
-                    }
+                    if (spatialInterval) { clearInterval(spatialInterval); spatialInterval = null; }
+                    if (smoothAnimationFrame) { cancelAnimationFrame(smoothAnimationFrame); smoothAnimationFrame = null; }
                 } else {
-                    if (smoothMovement) {
-                        generateNewPath();
-                        startSmoothMovement();
-                    } else {
-                        updateSpatialPosition();
-                        spatialInterval = setInterval(() => {
-                            updateSpatialPosition();
-                        }, 2000);
-                    }
+                    if (smoothMovement) { generateNewPath(); startSmoothMovement(); }
+                    else { updateSpatialPosition(); spatialInterval = setInterval(() => updateSpatialPosition(), 2000); }
                 }
             }
         }
 
-        // ドラッグ操作
         function startDrag(event) {
             if (!spatialAudioActive || !manualMode) return;
             isDragging = true;
@@ -1975,10 +1788,8 @@
 
         function drag(event) {
             if (!isDragging || !spatialAudioActive || !manualMode) return;
-            
             event.preventDefault();
             const rect = canvas.getBoundingClientRect();
-            
             let x, y;
             if (event.type.includes('touch')) {
                 x = ((event.touches[0].clientX - rect.left) / rect.width) * canvas.width;
@@ -1987,13 +1798,11 @@
                 x = ((event.clientX - rect.left) / rect.width) * canvas.width;
                 y = ((event.clientY - rect.top) / rect.height) * canvas.height;
             }
-            
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const maxRadius = Math.min(canvas.width, canvas.height) * 0.4;
             const dx = (x - centerX) / maxRadius;
             const dz = -(y - centerY) / maxRadius;
-            
             const distance = Math.sqrt(dx * dx + dz * dz);
             if (distance <= 1) {
                 currentSoundX = dx;
@@ -2008,153 +1817,80 @@
             isDragging = false;
         }
 
-        // 音源位置設定
         function setSoundPosition(x, y, z) {
             if (!pannerNode || !isPlaying) return;
-            
-            // より強調された3D位置設定
             pannerNode.positionX.setValueAtTime(x * 3, audioContext.currentTime);
             pannerNode.positionY.setValueAtTime(y * 3, audioContext.currentTime);
             pannerNode.positionZ.setValueAtTime(z * 3, audioContext.currentTime);
-            
-            // パンナーの距離モデルをより強調
             pannerNode.refDistance = 0.5;
             pannerNode.maxDistance = 15;
             pannerNode.rolloffFactor = 2;
-            
             if (lowpassFilter && highpassFilter) {
                 let lowpassFreq = 20000;
                 let highpassFreq = 20;
-                
-                // 前後の位置による変化を強調
-                if (z < 0) {
-                    // 後ろ：こもった音（低域強調）
-                    lowpassFreq = 1500 - (Math.abs(z) * 1000);
-                    highpassFreq = 20;
-                } else {
-                    // 前：クリアな音（高域も含む）
-                    lowpassFreq = 10000 + (z * 10000);
-                    highpassFreq = 100 + (z * 200);
-                }
-                
-                // 上下の位置による変化を強調
-                if (y > 0) {
-                    // 上：明るい音
-                    lowpassFreq = Math.min(20000, lowpassFreq + (y * 5000));
-                    highpassFreq = Math.max(20, highpassFreq + (y * 300));
-                } else if (y < 0) {
-                    // 下：暗い音
-                    lowpassFreq = Math.max(800, lowpassFreq + (y * 8000));
-                    highpassFreq = Math.max(20, highpassFreq - (Math.abs(y) * 50));
-                }
-                
-                // 左右の位置による音量差を追加（ミュート状態を考慮）
-                const stereoBalance = x; // -1 (左) to 1 (右)
+                if (z < 0) { lowpassFreq = 1500 - (Math.abs(z) * 1000); highpassFreq = 20; }
+                else { lowpassFreq = 10000 + (z * 10000); highpassFreq = 100 + (z * 200); }
+                if (y > 0) { lowpassFreq = Math.min(20000, lowpassFreq + (y * 5000)); highpassFreq = Math.max(20, highpassFreq + (y * 300)); }
+                else if (y < 0) { lowpassFreq = Math.max(800, lowpassFreq + (y * 8000)); highpassFreq = Math.max(20, highpassFreq - (Math.abs(y) * 50)); }
+                const stereoBalance = x;
                 if (leftGain && rightGain) {
                     const leftAdjust = 1 - Math.max(0, stereoBalance * 0.5);
                     const rightAdjust = 1 + Math.min(0, stereoBalance * 0.5);
-                    
-                    if (!leftMuted) {
-                        leftGain.gain.setValueAtTime(
-                            0.3 * masterVolume * leftVolume * leftAdjust, 
-                            audioContext.currentTime
-                        );
-                    }
-                    
-                    if (!rightMuted) {
-                        rightGain.gain.setValueAtTime(
-                            0.3 * masterVolume * rightVolume * rightAdjust, 
-                            audioContext.currentTime
-                        );
-                    }
+                    if (!leftMuted) leftGain.gain.setValueAtTime(0.3 * masterVolume * leftVolume * leftAdjust, audioContext.currentTime);
+                    if (!rightMuted) rightGain.gain.setValueAtTime(0.3 * masterVolume * rightVolume * rightAdjust, audioContext.currentTime);
                 }
-                
                 lowpassFilter.frequency.setValueAtTime(lowpassFreq, audioContext.currentTime);
                 highpassFilter.frequency.setValueAtTime(highpassFreq, audioContext.currentTime);
-                
-                // Q値（共鳴）も位置に応じて変更
                 const qValue = 1 + Math.abs(z) * 3 + Math.abs(y) * 2;
                 lowpassFilter.Q.setValueAtTime(qValue, audioContext.currentTime);
                 highpassFilter.Q.setValueAtTime(qValue * 0.5, audioContext.currentTime);
             }
-            
             updatePositionDisplay(x, y, z);
         }
 
-        // 位置表示更新
         function updatePositionDisplay(x, y, z) {
             let position = '';
-            
-            if (Math.abs(x) > 0.3) {
-                position += x > 0 ? 'Right ' : 'Left ';
-            }
-            
-            if (Math.abs(z) > 0.3) {
-                position += z > 0 ? 'Front' : 'Back';
-            }
-            
+            if (Math.abs(x) > 0.3) position += x > 0 ? 'Right ' : 'Left ';
+            if (Math.abs(z) > 0.3) position += z > 0 ? 'Front' : 'Back';
             if (position === '') position = 'Center';
-            
             const distance = Math.sqrt(x*x + y*y + z*z);
             const distanceText = distance < 0.5 ? 'Near' : distance < 1 ? 'Mid' : 'Far';
-            
             let height = '';
-            if (Math.abs(y) > 0.3) {
-                height = y > 0 ? 'Up' : 'Down';
-            } else {
-                height = 'Center';
-            }
-            
+            if (Math.abs(y) > 0.3) height = y > 0 ? 'Up' : 'Down';
+            else height = 'Center';
             document.getElementById('spatialPosition').textContent = `${position} (${height}, ${distanceText})`;
         }
 
-        // 空間位置更新
         function updateSpatialPosition() {
             if (!spatialAudioActive || manualMode) return;
-            
             const theta = Math.random() * Math.PI * 2;
             const phi = (Math.random() - 0.5) * Math.PI;
             const radius = 0.3 + Math.random() * 0.7;
-            
             currentSoundX = Math.cos(theta) * Math.cos(phi) * radius;
             currentSoundY = Math.sin(phi) * radius;
             currentSoundZ = Math.sin(theta) * Math.cos(phi) * radius;
-            
             targetSoundX = currentSoundX;
             targetSoundY = currentSoundY;
             targetSoundZ = currentSoundZ;
-            
             setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
         }
 
-        // 再生/停止
         function togglePlay() {
-            if (!isPlaying) {
-                startSound();
-            } else {
-                stopSound();
-            }
+            if (!isPlaying) startSound();
+            else stopSound();
         }
 
         function startSound() {
             initAudio();
-            
-            // iOS対策: AudioContextが確実に動作するまで待機
             const startAudioContext = () => {
-                if (audioContext.state === 'suspended') {
-                    return audioContext.resume();
-                }
+                if (audioContext.state === 'suspended') return audioContext.resume();
                 return Promise.resolve();
             };
-            
             startAudioContext().then(() => {
                 enterFullscreen();
-                
                 const leftFreq = parseFloat(document.getElementById('leftFreq').value);
                 const rightFreq = parseFloat(document.getElementById('rightFreq').value);
                 const bpm = parseFloat(document.getElementById('bpmSlider').value);
-                
-                // iOS対策: ダミーの音を一瞬再生してオーディオコンテキストを確実に開始
                 const dummy = audioContext.createOscillator();
                 const dummyGain = audioContext.createGain();
                 dummy.connect(dummyGain);
@@ -2162,22 +1898,18 @@
                 dummyGain.gain.value = 0.001;
                 dummy.start();
                 dummy.stop(audioContext.currentTime + 0.01);
-                
                 setTimeout(() => {
                     leftOscillator = audioContext.createOscillator();
                     leftGain = audioContext.createGain();
                     leftOscillator.frequency.value = leftFreq;
                     leftOscillator.type = 'sine';
                     leftGain.gain.value = leftMuted ? 0 : 0.3 * masterVolume * leftVolume;
-                    
                     rightOscillator = audioContext.createOscillator();
                     rightGain = audioContext.createGain();
                     rightOscillator.frequency.value = rightFreq;
                     rightOscillator.type = 'sine';
                     rightGain.gain.value = rightMuted ? 0 : 0.3 * masterVolume * rightVolume;
-                    
                     merger = audioContext.createChannelMerger(2);
-                    
                     if (spatialAudioActive) {
                         pannerNode = audioContext.createPanner();
                         pannerNode.panningModel = 'HRTF';
@@ -2188,7 +1920,6 @@
                         pannerNode.coneInnerAngle = 360;
                         pannerNode.coneOuterAngle = 360;
                         pannerNode.coneOuterGain = 0;
-                        
                         if (audioContext.listener.forwardX) {
                             audioContext.listener.forwardX.setValueAtTime(0, audioContext.currentTime);
                             audioContext.listener.forwardY.setValueAtTime(0, audioContext.currentTime);
@@ -2197,30 +1928,24 @@
                             audioContext.listener.upY.setValueAtTime(1, audioContext.currentTime);
                             audioContext.listener.upZ.setValueAtTime(0, audioContext.currentTime);
                         }
-                        
                         lowpassFilter = audioContext.createBiquadFilter();
                         lowpassFilter.type = 'lowpass';
                         lowpassFilter.frequency.value = 20000;
                         lowpassFilter.Q.value = 1;
-                        
                         highpassFilter = audioContext.createBiquadFilter();
                         highpassFilter.type = 'highpass';
                         highpassFilter.frequency.value = 20;
                         highpassFilter.Q.value = 0.7;
-                        
                         const compressor = audioContext.createDynamicsCompressor();
                         compressor.threshold.value = -24;
                         compressor.knee.value = 30;
                         compressor.ratio.value = 12;
                         compressor.attack.value = 0.003;
                         compressor.release.value = 0.25;
-                        
                         leftOscillator.connect(leftGain);
                         leftGain.connect(merger, 0, 0);
-                        
                         rightOscillator.connect(rightGain);
                         rightGain.connect(merger, 0, 1);
-                        
                         merger.connect(lowpassFilter);
                         lowpassFilter.connect(highpassFilter);
                         highpassFilter.connect(compressor);
@@ -2229,111 +1954,72 @@
                     } else {
                         leftOscillator.connect(leftGain);
                         leftGain.connect(merger, 0, 0);
-                        
                         rightOscillator.connect(rightGain);
                         rightGain.connect(merger, 0, 1);
-                        
                         merger.connect(audioContext.destination);
                     }
-                    
                     leftOscillator.start();
                     rightOscillator.start();
                     
+                    // 追加トーンを生成（同時出力）
+                    rebuildExtraOscillators();
+                    
                     updateBPM(bpm);
-                    
-                    if (document.getElementById('randomBpm').checked) {
-                        startRandomBPM();
-                    }
-                    
+                    if (document.getElementById('randomBpm').checked) startRandomBPM();
                     if (spatialAudioActive) {
                         setTimeout(() => {
                             if (!manualMode) {
-                                if (smoothMovement) {
-                                    generateNewPath();
-                                    startSmoothMovement();
-                                } else {
-                                    updateSpatialPosition();
-                                    spatialInterval = setInterval(() => {
-                                        updateSpatialPosition();
-                                    }, 2000);
-                                }
+                                if (smoothMovement) { generateNewPath(); startSmoothMovement(); }
+                                else { updateSpatialPosition(); spatialInterval = setInterval(() => updateSpatialPosition(), 2000); }
                             } else {
                                 setSoundPosition(currentSoundX, currentSoundY, currentSoundZ);
                             }
                         }, 100);
                     }
-                    
                     isPlaying = true;
                     document.getElementById('playBtn').style.display = 'none';
                     document.getElementById('stopBtn').style.display = 'inline-block';
                 }, 50);
-            }).catch(err => {
-                console.error('AudioContext start error:', err);
-            });
+            }).catch(err => console.error('AudioContext error:', err));
         }
 
         function stopSound() {
-            if (leftOscillator) {
-                leftOscillator.stop();
-                leftOscillator = null;
-            }
-            if (rightOscillator) {
-                rightOscillator.stop();
-                rightOscillator = null;
-            }
-            
+            if (leftOscillator) { leftOscillator.stop(); leftOscillator = null; }
+            if (rightOscillator) { rightOscillator.stop(); rightOscillator = null; }
+            // 追加トーンも停止
+            extraOscillators.forEach(osc => { try { osc.stop(); } catch(e) {} });
+            extraOscillators = [];
             leftGain = null;
             rightGain = null;
             merger = null;
             pannerNode = null;
             lowpassFilter = null;
             highpassFilter = null;
-            
-            if (bpmInterval) {
-                clearInterval(bpmInterval);
-                bpmInterval = null;
-            }
-            
+            if (bpmInterval) { clearInterval(bpmInterval); bpmInterval = null; }
             stopRandomBPM();
-            
-            if (spatialInterval) {
-                clearInterval(spatialInterval);
-                spatialInterval = null;
-            }
-            
-            if (smoothAnimationFrame) {
-                cancelAnimationFrame(smoothAnimationFrame);
-                smoothAnimationFrame = null;
-            }
-            
+            if (spatialInterval) { clearInterval(spatialInterval); spatialInterval = null; }
+            if (smoothAnimationFrame) { cancelAnimationFrame(smoothAnimationFrame); smoothAnimationFrame = null; }
             soundTrail = [];
-            
             isPlaying = false;
             document.getElementById('playBtn').style.display = 'inline-block';
             document.getElementById('stopBtn').style.display = 'none';
         }
 
-        // 情報モーダル関連
         function openInfoModal() {
             document.getElementById('infoPanel').classList.add('open');
             document.getElementById('infoOverlay').classList.add('visible');
         }
-        
+
         function closeInfoModal() {
             document.getElementById('infoPanel').classList.remove('open');
             document.getElementById('infoOverlay').classList.remove('visible');
         }
-        
+
         function switchTab(tabName) {
-            // すべてのタブボタンをリセット
             const tabs = document.querySelectorAll('.info-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // すべてのタブコンテンツを非表示
             document.getElementById('usageTab').style.display = 'none';
             document.getElementById('scienceTab').style.display = 'none';
-            
-            // 選択されたタブをアクティブに
             if (tabName === 'usage') {
                 tabs[0].classList.add('active');
                 document.getElementById('usageTab').style.display = 'block';
@@ -2343,11 +2029,8 @@
             }
         }
 
-        // ページ離脱時
         window.addEventListener('beforeunload', function() {
-            if (isPlaying) {
-                stopSound();
-            }
+            if (isPlaying) stopSound();
         });
     </script>
 </body>
